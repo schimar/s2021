@@ -7,7 +7,7 @@ Snakemake workflow for *Tetramorium alpestre* DNA analysis on the mach2 HPC clus
 
 ======================================================
 
-## conda and other [dependencies](https://github.com/schimar/ta_dna_snakemake_pbs/blob/main/envs/s21.yaml)
+## conda and other [dependencies](https://github.com/schimar/ta_dna_snakemake_pbs/blob/main/envs/s21.yaml) 
 
 
 
