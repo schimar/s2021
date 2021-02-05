@@ -1,0 +1,3 @@
+sample	location
+57339_ID1760_01-DNA_S90_L001	raw/
+57340_ID1760_02-DNA_S91_L001	raw/

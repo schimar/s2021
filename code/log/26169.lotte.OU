@@ -1,0 +1,265 @@
+*****
+SGI UV 3000 series BIOS 01/15/2015
+SUSE Linux Enterprise Server 12 SP2   Kernel Release: 4.4.120-92.70-default
+Fri Feb  5 11:50:24 CET 2021
+model name           : Intel(R) Xeon(R) CPU E5-4650 v3 @ 2.10GHz
+Architecture         : x86_64
+cpu MHz              : 2800.000
+cache size           : 30720 KB (Last Level)
+Total Number of Sockets             	: 144
+Total Number of Cores               	: 1728	(12 per socket)
+Hyperthreading                      	: OFF
+ HUB Version: 				 UVHub  3.0
+ Number of Hubs: 			 144
+ Number of connected Hubs: 		 144
+ Number of connected NUMAlink ports: 	 1984
+
+PBS Queue name: f2100.  Frequency selected 2100 MHz.
+CPUSET Path: /dev/cpuset/PBSPro/26169.lotte/cpuset.cpus
+CPUSET CPU Range: 144-167
+*****
+Module for jdk 1.8.0_45 loaded.
+  To use conda commands in your current shell session, first do:
+    source $UIBK_CONDA_PROFILE
+  To activate any of conda's environments, then do:
+    conda activate <environment>
+  To list available environments:
+    conda env list
+no change     /apps/uibk/Anaconda3/2020.03/condabin/conda
+no change     /apps/uibk/Anaconda3/2020.03/bin/conda
+no change     /apps/uibk/Anaconda3/2020.03/bin/conda-env
+no change     /apps/uibk/Anaconda3/2020.03/bin/activate
+no change     /apps/uibk/Anaconda3/2020.03/bin/deactivate
+no change     /apps/uibk/Anaconda3/2020.03/etc/profile.d/conda.sh
+no change     /apps/uibk/Anaconda3/2020.03/etc/fish/conf.d/conda.fish
+no change     /apps/uibk/Anaconda3/2020.03/shell/condabin/Conda.psm1
+no change     /apps/uibk/Anaconda3/2020.03/shell/condabin/conda-hook.ps1
+no change     /apps/uibk/Anaconda3/2020.03/lib/python3.7/site-packages/xontrib/conda.xsh
+no change     /apps/uibk/Anaconda3/2020.03/etc/profile.d/conda.csh
+no change     /home/uibk/c7701188/.bashrc
+No action taken.
+Running on
+      1 mach2.edvz.uni-linz.ac.at
+Building DAG of jobs...
+Checking status of 0 jobs.
+Using shell: /bin/bash
+Provided cluster nodes: 2000
+Job counts:
+	count	jobs
+	1	all
+	2	map
+	2	qc
+	2	samIndex
+	2	trim
+	9
+Resources before job selection: {'_cores': 9223372036854775807, '_nodes': 2000}
+Ready jobs (4):
+	qc
+	trim
+	qc
+	trim
+Selected jobs (4):
+	qc
+	trim
+	qc
+	trim
+Resources after job selection: {'_cores': 9223372036854775801, '_nodes': 1996}
+
+[Fri Feb  5 11:50:29 2021]
+Job 2: --- Quality check of raw data with FastQC before trimming.
+
+Jobscript:
+#!/bin/sh
+# properties = {"type": "single", "rule": "qc", "local": false, "input": ["raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz", "raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz"], "output": ["raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R1_001_fastqc.html", "raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R1_001_fastqc.zip", "raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R2_001_fastqc.html", "raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R2_001_fastqc.zip"], "wildcards": {"sample": "57340_ID1760_02-DNA_S91_L001"}, "params": {}, "log": ["log/57340_ID1760_02-DNA_S91_L001.qc.log.txt"], "threads": 1, "resources": {}, "jobid": 2, "cluster": {"jobname": "qc.sample=57340_ID1760_02-DNA_S91_L001", "ncpus": 12, "mem": "120gb", "walltime": "72:00:00", "account": "c7701188", "queue": "f2100", "email": "schimar@gmail.com", "mailon": "bea", "jobout": "oe", "outdir": "code/log/"}}
+cd /scratch/uibk/c7701188/ta/dn/s2021 && \
+/home/uibk/c7701188/.conda/envs/ta/bin/python3.9 \
+-m snakemake raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R1_001_fastqc.html --snakefile /scratch/uibk/c7701188/ta/dn/s2021/snakefile \
+--force -j --keep-target-files --keep-remote \
+--wait-for-files /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1 raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz --latency-wait 20 \
+ --attempt 1 --force-use-threads \
+--wrapper-prefix https://bitbucket.org/snakemake/snakemake-wrappers/raw/ \
+   --allowed-rules qc --nocolor --notemp --no-hooks --nolock \
+--mode 2  && touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/2.jobfinished" || (touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/2.jobfailed"; exit 1)
+
+Submitted job 2 with external jobid 'mgjf'.
+
+[Fri Feb  5 11:50:29 2021]
+Job 4: --- Quality trimming of fastq files before mapping.
+
+Jobscript:
+#!/bin/sh
+# properties = {"type": "single", "rule": "trim", "local": false, "input": ["raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz", "raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz", "/home/uibk/c7701188/bio/bbmap/resources/adapters.fa"], "output": ["trm/57340_ID1760_02-DNA_S91_L001_R1_trm.fq.gz", "trm/57340_ID1760_02-DNA_S91_L001_R2_trm.fq.gz"], "wildcards": {"sample": "57340_ID1760_02-DNA_S91_L001"}, "params": {}, "log": ["log/57340_ID1760_02-DNA_S91_L001.bbduk_qual_trim.log.txt"], "threads": 2, "resources": {}, "jobid": 4, "cluster": {"jobname": "trim.sample=57340_ID1760_02-DNA_S91_L001", "ncpus": 12, "mem": "120gb", "walltime": "72:00:00", "account": "c7701188", "queue": "f2100", "email": "schimar@gmail.com", "mailon": "bea", "jobout": "oe", "outdir": "code/log/"}}
+cd /scratch/uibk/c7701188/ta/dn/s2021 && \
+/home/uibk/c7701188/.conda/envs/ta/bin/python3.9 \
+-m snakemake trm/57340_ID1760_02-DNA_S91_L001_R1_trm.fq.gz --snakefile /scratch/uibk/c7701188/ta/dn/s2021/snakefile \
+--force -j --keep-target-files --keep-remote \
+--wait-for-files /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1 raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz /home/uibk/c7701188/bio/bbmap/resources/adapters.fa --latency-wait 20 \
+ --attempt 1 --force-use-threads \
+--wrapper-prefix https://bitbucket.org/snakemake/snakemake-wrappers/raw/ \
+   --allowed-rules trim --nocolor --notemp --no-hooks --nolock \
+--mode 2  && touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/4.jobfinished" || (touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/4.jobfailed"; exit 1)
+
+Submitted job 4 with external jobid 'mgjf'.
+
+[Fri Feb  5 11:50:29 2021]
+Job 1: --- Quality check of raw data with FastQC before trimming.
+
+Jobscript:
+#!/bin/sh
+# properties = {"type": "single", "rule": "qc", "local": false, "input": ["raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz", "raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz"], "output": ["raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.html", "raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.zip", "raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.html", "raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.zip"], "wildcards": {"sample": "57339_ID1760_01-DNA_S90_L001"}, "params": {}, "log": ["log/57339_ID1760_01-DNA_S90_L001.qc.log.txt"], "threads": 1, "resources": {}, "jobid": 1, "cluster": {"jobname": "qc.sample=57339_ID1760_01-DNA_S90_L001", "ncpus": 12, "mem": "120gb", "walltime": "72:00:00", "account": "c7701188", "queue": "f2100", "email": "schimar@gmail.com", "mailon": "bea", "jobout": "oe", "outdir": "code/log/"}}
+cd /scratch/uibk/c7701188/ta/dn/s2021 && \
+/home/uibk/c7701188/.conda/envs/ta/bin/python3.9 \
+-m snakemake raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.html --snakefile /scratch/uibk/c7701188/ta/dn/s2021/snakefile \
+--force -j --keep-target-files --keep-remote \
+--wait-for-files /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1 raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz --latency-wait 20 \
+ --attempt 1 --force-use-threads \
+--wrapper-prefix https://bitbucket.org/snakemake/snakemake-wrappers/raw/ \
+   --allowed-rules qc --nocolor --notemp --no-hooks --nolock \
+--mode 2  && touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/1.jobfinished" || (touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/1.jobfailed"; exit 1)
+
+Submitted job 1 with external jobid 'mgjf'.
+
+[Fri Feb  5 11:50:29 2021]
+Job 3: --- Quality trimming of fastq files before mapping.
+
+Jobscript:
+#!/bin/sh
+# properties = {"type": "single", "rule": "trim", "local": false, "input": ["raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz", "raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz", "/home/uibk/c7701188/bio/bbmap/resources/adapters.fa"], "output": ["trm/57339_ID1760_01-DNA_S90_L001_R1_trm.fq.gz", "trm/57339_ID1760_01-DNA_S90_L001_R2_trm.fq.gz"], "wildcards": {"sample": "57339_ID1760_01-DNA_S90_L001"}, "params": {}, "log": ["log/57339_ID1760_01-DNA_S90_L001.bbduk_qual_trim.log.txt"], "threads": 2, "resources": {}, "jobid": 3, "cluster": {"jobname": "trim.sample=57339_ID1760_01-DNA_S90_L001", "ncpus": 12, "mem": "120gb", "walltime": "72:00:00", "account": "c7701188", "queue": "f2100", "email": "schimar@gmail.com", "mailon": "bea", "jobout": "oe", "outdir": "code/log/"}}
+cd /scratch/uibk/c7701188/ta/dn/s2021 && \
+/home/uibk/c7701188/.conda/envs/ta/bin/python3.9 \
+-m snakemake trm/57339_ID1760_01-DNA_S90_L001_R1_trm.fq.gz --snakefile /scratch/uibk/c7701188/ta/dn/s2021/snakefile \
+--force -j --keep-target-files --keep-remote \
+--wait-for-files /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1 raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz /home/uibk/c7701188/bio/bbmap/resources/adapters.fa --latency-wait 20 \
+ --attempt 1 --force-use-threads \
+--wrapper-prefix https://bitbucket.org/snakemake/snakemake-wrappers/raw/ \
+   --allowed-rules trim --nocolor --notemp --no-hooks --nolock \
+--mode 2  && touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/3.jobfinished" || (touch "/scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/3.jobfailed"; exit 1)
+
+Submitted job 3 with external jobid 'mgjf'.
+Checking status of 4 jobs.
+[Fri Feb  5 11:50:39 2021]
+Error in rule qc:
+    jobid: 2
+    output: raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R1_001_fastqc.html, raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R1_001_fastqc.zip, raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R2_001_fastqc.html, raw/qc/fastqc/57340_ID1760_02-DNA_S91_L001_R2_001_fastqc.zip
+    log: log/57340_ID1760_02-DNA_S91_L001.qc.log.txt (check log file(s) for error message)
+    shell:
+        
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz &
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz
+        
+        (exited with non-zero exit code)
+    cluster_jobid: mgjf
+
+Error executing rule qc on cluster (jobid: 2, external: mgjf, jobscript: /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/snakejob.qc.2.sh). For detailed error see the cluster log.
+Cleanup job metadata.
+[Fri Feb  5 11:50:39 2021]
+Error in rule trim:
+    jobid: 4
+    output: trm/57340_ID1760_02-DNA_S91_L001_R1_trm.fq.gz, trm/57340_ID1760_02-DNA_S91_L001_R2_trm.fq.gz
+    log: log/57340_ID1760_02-DNA_S91_L001.bbduk_qual_trim.log.txt (check log file(s) for error message)
+    shell:
+        
+        bbduk.sh -Xmx1g in1=raw/57340_ID1760_02-DNA_S91_L001_R1_001.fastq.gz in2=raw/57340_ID1760_02-DNA_S91_L001_R2_001.fastq.gz out1=trm/57340_ID1760_02-DNA_S91_L001_R1_trm.fq.gz out2=trm/57340_ID1760_02-DNA_S91_L001_R2_trm.fq.gz trimq=6 qtrim=r hdist=1 bhist=trm/hist/57340_ID1760_02-DNA_S91_L001.bhist qhist=trm/hist/57340_ID1760_02-DNA_S91_L001.qhist lhist=trm/hist/57340_ID1760_02-DNA_S91_L001.lhist tpe tbo #&> log/57340_ID1760_02-DNA_S91_L001_bbduk_trm.log
+        
+        (exited with non-zero exit code)
+    cluster_jobid: mgjf
+
+Error executing rule trim on cluster (jobid: 4, external: mgjf, jobscript: /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/snakejob.trim.4.sh). For detailed error see the cluster log.
+Cleanup job metadata.
+[Fri Feb  5 11:50:39 2021]
+Error in rule qc:
+    jobid: 1
+    output: raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.html, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.zip, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.html, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.zip
+    log: log/57339_ID1760_01-DNA_S90_L001.qc.log.txt (check log file(s) for error message)
+    shell:
+        
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz &
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz
+        
+        (exited with non-zero exit code)
+    cluster_jobid: mgjf
+
+Error executing rule qc on cluster (jobid: 1, external: mgjf, jobscript: /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/snakejob.qc.1.sh). For detailed error see the cluster log.
+Cleanup job metadata.
+[Fri Feb  5 11:50:39 2021]
+Error in rule trim:
+    jobid: 3
+    output: trm/57339_ID1760_01-DNA_S90_L001_R1_trm.fq.gz, trm/57339_ID1760_01-DNA_S90_L001_R2_trm.fq.gz
+    log: log/57339_ID1760_01-DNA_S90_L001.bbduk_qual_trim.log.txt (check log file(s) for error message)
+    shell:
+        
+        bbduk.sh -Xmx1g in1=raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz in2=raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz out1=trm/57339_ID1760_01-DNA_S90_L001_R1_trm.fq.gz out2=trm/57339_ID1760_01-DNA_S90_L001_R2_trm.fq.gz trimq=6 qtrim=r hdist=1 bhist=trm/hist/57339_ID1760_01-DNA_S90_L001.bhist qhist=trm/hist/57339_ID1760_01-DNA_S90_L001.qhist lhist=trm/hist/57339_ID1760_01-DNA_S90_L001.lhist tpe tbo #&> log/57339_ID1760_01-DNA_S90_L001_bbduk_trm.log
+        
+        (exited with non-zero exit code)
+    cluster_jobid: mgjf
+
+Error executing rule trim on cluster (jobid: 3, external: mgjf, jobscript: /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/tmp.krzfkjy1/snakejob.trim.3.sh). For detailed error see the cluster log.
+Cleanup job metadata.
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /scratch/uibk/c7701188/ta/dn/s2021/.snakemake/log/2021-02-05T115028.608923.snakemake.log
+unlocking
+removing lock
+removing lock
+removed all locks
+Job Id: 26169.lotte
+    Job_Name = m2smk
+    Job_Owner = c7701188@lotte.edvz.uni-linz.ac.at
+    resources_used.cpupercent = 100
+    resources_used.cput = 00:00:04
+    resources_used.mem = 63780kb
+    resources_used.ncpus = 24
+    resources_used.vmem = 620104kb
+    resources_used.walltime = 00:00:21
+    job_state = R
+    queue = f2100
+    server = lotte
+    Checkpoint = u
+    ctime = Fri Feb  5 11:50:23 2021
+    Error_Path = lotte.edvz.uni-linz.ac.at:/scratch/uibk/c7701188/ta/dn/s2021/m
+	2smk.e26169
+    exec_host = mach2/48*0
+    exec_vnode = (mach2[12]:ncpus=12:mem=127972108kb+mach2[13]:ncpus=12:mem=123
+	686132kb)
+    Hold_Types = n
+    Join_Path = oe
+    Keep_Files = n
+    Mail_Points = bea
+    Mail_Users = schimar@gmail.com
+    mtime = Fri Feb  5 11:50:26 2021
+    Output_Path = lotte.edvz.uni-linz.ac.at:/scratch/uibk/c7701188/ta/dn/s2021/
+	code/log/
+    Priority = 0
+    qtime = Fri Feb  5 11:50:23 2021
+    Rerunable = True
+    Resource_List.mem = 240gb
+    Resource_List.ncpus = 24
+    Resource_List.nodect = 1
+    Resource_List.place = free
+    Resource_List.select = 1:mem=240gb:ncpus=24
+    Resource_List.walltime = 72:00:00
+    stime = Fri Feb  5 11:50:23 2021
+    session_id = 1039087
+    jobdir = /home/uibk/c7701188
+    substate = 42
+    Variable_List = PBS_O_HOME=/home/uibk/c7701188,PBS_O_LANG=en_US.UTF-8,
+	PBS_O_LOGNAME=c7701188,
+	PBS_O_PATH=/home/wlclose/miniconda3/bin:/usr/local/bin:/usr/bin:/bin:/
+	usr/games:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/pbs/bin,
+	PBS_O_MAIL=/var/mail/c7701188,PBS_O_SHELL=/bin/bash,
+	PBS_O_WORKDIR=/scratch/uibk/c7701188/ta/dn/s2021,PBS_O_SYSTEM=Linux,
+	PBS_O_QUEUE=f2100,PBS_O_HOST=lotte.edvz.uni-linz.ac.at
+    comment = Job run at Fri Feb 05 at 11:50 on (mach2[12]:ncpus=12:mem=1279721
+	08kb+mach2[13]:ncpus=12:mem=123686132kb)
+    alt_id = cpuset=/PBSPro/26169.lotte
+    etime = Fri Feb  5 11:50:23 2021
+    run_count = 1
+    Submit_arguments = code/clusterSnakemake.pbs
+    pset = board=r001i01b06
+    project = _pbs_project_default
+
+ 
+*****
+PBS Job Ended, resetting CPU Freq to idle frequency 1200 MHz.
+CPUSET CPU Range: 144-167
+*****

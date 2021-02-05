@@ -1,0 +1,19 @@
+__default__:
+  jobname: "{rule}.{wildcards}"
+  ncpus: 12
+  mem: "120gb"
+  walltime: "72:00:00"
+  #qos: "flux"
+  account: "c7701188"
+  queue: "f2100"
+  email: "schimar@gmail.com"
+  mailon: "bea"
+  jobout: "oe"
+  outdir: "code/log/"
+
+  #nodes: 1
+  #ppn: 12
+
+  #count_words:
+  #  ppn: 12
+  #  walltime: "72:00:00"

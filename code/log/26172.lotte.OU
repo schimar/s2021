@@ -1,0 +1,53 @@
+*****
+SGI UV 3000 series BIOS 01/15/2015
+SUSE Linux Enterprise Server 12 SP2   Kernel Release: 4.4.120-92.70-default
+Fri Feb  5 11:50:30 CET 2021
+model name           : Intel(R) Xeon(R) CPU E5-4650 v3 @ 2.10GHz
+Architecture         : x86_64
+cpu MHz              : 2800.000
+cache size           : 30720 KB (Last Level)
+Total Number of Sockets             	: 144
+Total Number of Cores               	: 1728	(12 per socket)
+Hyperthreading                      	: OFF
+ HUB Version: 				 UVHub  3.0
+ Number of Hubs: 			 144
+ Number of connected Hubs: 		 144
+ Number of connected NUMAlink ports: 	 1984
+
+PBS Queue name: f2100.  Frequency selected 2100 MHz.
+CPUSET Path: /dev/cpuset/PBSPro/26172.lotte/cpuset.cpus
+CPUSET CPU Range: 168-179
+*****
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 12
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	qc
+	1
+
+[Fri Feb  5 11:50:34 2021]
+Job 0: --- Quality check of raw data with FastQC before trimming.
+
+/bin/bash: line 1: fastqc: command not found
+/bin/bash: fastqc: command not found
+[Fri Feb  5 11:50:34 2021]
+Error in rule qc:
+    jobid: 0
+    output: raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.html, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R1_001_fastqc.zip, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.html, raw/qc/fastqc/57339_ID1760_01-DNA_S90_L001_R2_001_fastqc.zip
+    log: log/57339_ID1760_01-DNA_S90_L001.qc.log.txt (check log file(s) for error message)
+    shell:
+        
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57339_ID1760_01-DNA_S90_L001_R1_001.fastq.gz &
+        fastqc -o raw/qc/fastqc/ -f fastq raw/57339_ID1760_01-DNA_S90_L001_R2_001.fastq.gz
+        
+        (exited with non-zero exit code)
+
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+ 
+*****
+PBS Job Ended, resetting CPU Freq to idle frequency 1200 MHz.
+CPUSET CPU Range: 168-179
+*****
