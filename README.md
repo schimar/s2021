@@ -11,10 +11,14 @@ Snakemake workflow for *Tetramorium alpestre* DNA analysis on the mach2 HPC clus
 
 create environment from yaml file (in envs/):
 ```
+# run these two once, to create the environment:
 conda init bash
 conda env create -f envs/s21.yaml
 
+# with this, you can activate the environment with all [dependencies](https://github.com/schimar/ta_dna_snakemake_pbs/blob/main/envs/s21.yaml):
 conda activate ta
+
+# (also, when ssh'ing onto mach2, you can activate the env and then do a dry-run of your workflow) 
 ```
 
 ## how to submit the main snakemake job:
