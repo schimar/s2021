@@ -31,6 +31,8 @@ rule qc:
     #    mem = 1000,
     #    time = 300
     threads: 1
+	conda:
+	    "envs/s21.yaml"
     message: """--- Quality check of raw data with FastQC before trimming."""
     shell: """
         fastqc -o raw/qc/fastqc/ -f fastq {input.r1} &
@@ -51,6 +53,8 @@ rule trim:
     #    mem = 1000,
     #    time = 300
     threads: 2
+	conda:
+	    "envs/s21.yaml"
     message: """--- Quality trimming of fastq files before mapping."""
     shell: 
         """
