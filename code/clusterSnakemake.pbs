@@ -52,7 +52,7 @@ module load Anaconda3/2020.03/miniconda-base-2020.03
 
 source $UIBK_CONDA_PROFILE
 
-conda init bash
+#conda init bash
 
 conda activate ta
 

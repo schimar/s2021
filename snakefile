@@ -26,7 +26,7 @@ rule qc:
         "raw/qc/fastqc/{sample}_R1_001_fastqc.zip",
         "raw/qc/fastqc/{sample}_R2_001_fastqc.html",
         "raw/qc/fastqc/{sample}_R2_001_fastqc.zip"
-    log: "log/{sample}.qc.log.txt"
+    #log: "log/{sample}.qc.log.txt"
     #resources:
     #    mem = 1000,
     #    time = 300
@@ -73,24 +73,23 @@ rule map:
 		ref = config["ref"]
 	output:
 		bam = "bbmap/{sample}_trm.bam"
-	threads: 6
+	threads: 12
 	message: """--- Mapping reads to reference genome ---"""
 	shell:
 		"""
-		bbmap.sh -Xmx50g t={threads} ref={input.ref} in1={input.tr1} in2={input.tr2} out={output.bam} minid=0.85 rgid={wildcards.sample} rglb=igaDNA rgsm={wildcards.sample} rgpl=ILLUMINA overwrite=f unpigz=t | samtools view -F 4 -Shu /dev/stdin | samtools sort -l 4 - -o {output.bam} 
+		bbmap.sh -Xmx50g t={threads} ref={input.ref} in1={input.tr1} in2={input.tr2} out=stdout.sam minid=0.85 rgid={wildcards.sample} rglb=igaDNA rgsm={wildcards.sample} rgpl=ILLUMINA overwrite=f unpigz=t | samtools view -F 4 -Shu - | samtools sort - -o {output.bam}
 		"""
-#&> log/{wildcards.sample}.bbmap.log.txt
 
-rule samIndex:
+rule bamIndex:
 	input: 
-		aln = expand('bbmap/{sample}_trm.bam', sample=sample_names)	#"bbmap/{sample}_trm.bam"
+		aln = 'bbmap/{sample}_trm.bam'	
 	output:
 		idx = "bbmap/{sample}_trm.bam.bai"
 	threads: 2
 	message: """--- Indexing with samtools ---"""
 	shell:
 		"""
-		samtools index {input.aln}
+		samtools index {input.aln} {output.idx}
 		"""
 
 
