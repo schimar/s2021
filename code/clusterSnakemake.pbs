@@ -85,7 +85,7 @@ fi
 
 
 # Initiating snakemake and running workflow in cluster mode
-snakemake --use-conda --profile config/pbs-torque/ --latency-wait 20
+snakemake --use-envmodules --profile config/pbs-torque/ --latency-wait 20
 
 
 

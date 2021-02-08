@@ -6,7 +6,7 @@ dependencies:
   - fastqc
   - multiqc
   - python
-  - snakemake-minimal=5.5.4
+  - snakemake-minimal=5.32.0
   - bbmap
   - matplotlib
   - numpy
