@@ -25,15 +25,15 @@ rule trim:
         r2 = lambda wildcards: getFqHome(wildcards.sample)[1],
         adapters = config["adapters"]
     output:
-        r1trmd = "trm/{sample}_R1_trm.fq.gz",
-        r2trmd = "trm/{sample}_R2_trm.fq.gz"
+        r1trmd = "trm/{sample}_R1.fq.gz",
+        r2trmd = "trm/{sample}_R2.fq.gz"
     threads: 2
     message: """--- Quality trimming of fastq files before mapping."""
     shell: 
         """
         bbduk.sh -Xmx1g in1={input.r1} in2={input.r2} out1={output.r1trmd} out2={output.r2trmd} trimq=6 qtrim=r hdist=1 bhist=trm/hist/{wildcards.sample}.bhist qhist=trm/hist/{wildcards.sample}.qhist lhist=trm/hist/{wildcards.sample}.lhist tpe tbo 
         """
-#&> log/{wildcards.sample}_bbduk_trm.log
+#&> log/{wildcards.sample}_bbduk.log
 
 rule refIndex:
 	input:
@@ -48,12 +48,12 @@ rule refIndex:
 
 rule map:
 	input:
-		#tr1 = "trm/{sample}_R1_trm.fq.gz",
+		#tr1 = "trm/{sample}_R1.fq.gz",
 		tr1 = lambda wildcards: getTrmHome(wildcards.sample)[0],
 		tr2 = lambda wildcards: getTrmHome(wildcards.sample)[1],
 		ref = config["ref"]
 	output:
-		bam = "bbmap/{sample}_trm.bam"
+		bam = "bbmap/{sample}.bam"
 	threads: 24
 	message: """--- Mapping reads to reference genome ---"""
 	shell:
@@ -63,9 +63,9 @@ rule map:
 
 rule bamIndex:
 	input: 
-		aln = 'bbmap/{sample}_trm.bam'	
+		aln = 'bbmap/{sample}.bam'	
 	output:
-		idx = "bbmap/{sample}_trm.bam.bai"
+		idx = "bbmap/{sample}.bam.bai"
 	threads: 2
 	message: """--- Indexing with samtools ---"""
 	shell:
