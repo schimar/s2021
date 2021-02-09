@@ -19,4 +19,8 @@ rule all:
 
 
 include: "rules/hts.smk"
+include: "rules/vars.smk"
+
+
+
 
