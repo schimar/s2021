@@ -1,7 +1,3 @@
-
-
-
-
 rule qc:
     input:
         r1 = lambda wildcards: getFqHome(wildcards.sample)[0],

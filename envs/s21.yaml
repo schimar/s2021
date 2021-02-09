@@ -12,5 +12,6 @@ dependencies:
   - numpy
   - graphviz
   - pigz
-  - samtools 
+  - samtools=1.11
   - pandas
+  - sambamba=0.6.8

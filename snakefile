@@ -1,10 +1,8 @@
 include: "rules/common.smk"
 
-include: "rules/hts.smk"
 
 
-
-######    Rules    #####
+# -----------------------------------------------
 
 
 rule all:
@@ -17,4 +15,8 @@ rule all:
 
 
 
+# -----------------------------------------------
+
+
+include: "rules/hts.smk"
 
