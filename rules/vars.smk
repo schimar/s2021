@@ -30,4 +30,5 @@ rule qualCalc:
 
 rule bbdukQualRecal:
   input:
-    bam = bbmap/{sample}.bam
+    bam = bbmap/{sample}.bam'
+
