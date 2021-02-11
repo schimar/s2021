@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import glob
 
 ###### Config file and sample sheets #####
 
@@ -36,3 +37,21 @@ def getTrmHome(sample):
 #def getSamHome(sample):
 #  return(list(os.path.join(samples_dict[sample],"{0}_{1}_001.fastq.gz".format(sample,pair)) for pair in ['R1','R2']))
 
+
+ids = pd.read_table('samples108.txt')
+ids['id_nest'] = ids['inf'] + '_' + ids['nest']
+iddict = ids[['sample', 'id_nest']].set_index('sample').T.to_dict('list')
+
+
+
+def renameBamBai(path, namedict):
+  bamls = glob.glob(os.path.join(path, '*.bam'))
+  bamls.sort()
+  bails = glob.glob(os.path.join(path, '*.bam.bai'))
+  bails.sort()
+  for i, fname in enumerate(bamls):
+    os.rename(fname, os.path.join(path, '.'.join([namedict[fname], 'bam'])))
+    os.rename(bails[i], os.path.join(path, '.'.join([namedict[fname], 'bam.bai'])))
+
+ 
+# renameBamBai('bbmap', iddict)
