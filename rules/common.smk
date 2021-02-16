@@ -31,8 +31,8 @@ def getFqHome(sample):
 def getTrmHome(sample23):
   return(list(os.path.join('trm', "{0}_{1}_trm.fq.gz".format(sample23,pair)) for pair in ['R1','R2']))
 
-def getBamHome(ids, ext):
-  return(list(os.path.join('bbmap', '.'.join([ids, ext]))))
+#def getBamHome(ids):
+#    return(os.path.join('bbmap', "{ids}") #.format(ids=wildcards.ids)))
  
 #def getBamHome(ids, ext):
 #  return(list(os.path.join('bbmap', '.'.join([ids[ids.id_nest == wildcards.id].sample, ext]))))
