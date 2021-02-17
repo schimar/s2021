@@ -1,28 +1,14 @@
 
 rule mvBamBai:
   input:
-    bam = 'bbmap/{sample}.bam'
-    #bam = lambda wildcards: os.path.join('bbmap', "{ids}").format(ids=wildcards.id)
-    #bam = lambda wildcards: glob('bbmap/*.bam') 
-    #bam = lambda wildcards: ids[ids['sample'] == wildcards.idNest]['sample'].tolist(),
-    #bai = lambda wildcards: ids[ids['sample'] == wildcards.id]['sample'].tolist(),
-    ##bam = lambda wildcards: getBamHome(wildcards.idNest, 'bam'),
-    #bai = lambda wildcards: getBamHome(wildcards.id, 'bam.bai')
-    #bam = lambda wildcards: glob('bbmap/{sample}.bam'),
-    #bai = 'bbmap/{wildcards.sample}.bam.bai'
+    bam = 'bbmap/{sample}.bam',
+    bai = 'bbmap/{sample}.bam.bai'
   output:
-    #bam = 'bbmap/all/{iddict[sample][0]}.bam',
-    #bai = 'bbmap/all/{idNest}.bam.bai'
-  #run:
-  #  renameBamBai('bbmap', iddict)
+    touch('bbmap/{sample}.done')
   message: """--- Renaming bam and bai files to <id_nest>.bam,bam.bai from sample info ---"""
-  shell:
-    """
-    echo {input.bam} &
-    echo {output.bam}
-    """
+  run:
+    renameBamBai({input.bam}, {input.bai})
 
-#echo {input.bam}.bam \n {input.bam}.bai
 
 
 #rule callVars1:

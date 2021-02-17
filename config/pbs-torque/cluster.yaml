@@ -5,7 +5,7 @@ __default__:
   walltime: "72:00:00"
   #qos: "flux"
   account: "c7701188"
-  queue: "f2100"
+  queue: "f2800"
   email: "schimar@gmail.com"
   mailon: "bea"
   jobout: "oe"
