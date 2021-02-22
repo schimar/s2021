@@ -14,6 +14,8 @@ rule all:
 	    expand('bbmap/{sample}.bam', sample=ids['sample']),
 	    expand('bbmap/{sample}.done', sample=ids['sample']),
 	    #expand('bbmap/{id}.{ext}', id=ids['sample'], ext=['bam', 'bam.bai']),
+	    'vars/bam.list',
+	    'vars/ta_init.vcf',
 
 
 
