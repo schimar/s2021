@@ -16,6 +16,7 @@ rule all:
 	    #expand('bbmap/{id}.{ext}', id=ids['sample'], ext=['bam', 'bam.bai']),
 	    'vars/bam.list',
 	    'vars/ta_init.vcf',
+	    expand('vars/ta{type}.vcf', type=['SubInDel', 'InDel', 'Sub']),
 
 
 

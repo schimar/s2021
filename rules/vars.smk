@@ -36,16 +36,43 @@ rule callVars:
     /apps/uibk/bin/sysconfcpus -n 24 callvariants.sh -Xmx240g -Xms240g t={threads} list={input.id_list} ref={input.ref} ploidy=2 multisample out={output.vcf}
     """
 
-rule filterVars:
+
+
+rule filtVarsSUB:
   input:
     'vars/ta_init.vcf'
   output:
-    'vars/ta.vcf'
+    'vars/taSub.vcf'
   message: """--- Filtering variants for T. alpestre samples ---"""
   shell: 
     """
-    script/vcfBBfilt.py {input} > {output}
+    script/vcfBBfilt.py {input} "['SUB']" > {output}
     """
+
+rule filtVarsINDEL:
+  input:
+    'vars/ta_init.vcf'
+  output:
+    'vars/taInDel.vcf'
+  message: """--- Filtering variants for T. alpestre samples ---"""
+  shell: 
+    """
+    script/vcfBBfilt.py {input} "['DEL', 'INS']" > {output}
+    """
+
+rule filtVarsALL:
+  input:
+    'vars/ta_init.vcf'
+  output:
+    'vars/taSubInDel.vcf'
+  message: """--- Filtering variants for T. alpestre samples ---"""
+  shell: 
+    """
+    script/vcfBBfilt.py {input} "['SUB', 'DEL', 'INS']" > {output}
+    """
+
+
+
 
 
 
@@ -76,15 +103,15 @@ rule filterVars:
 #    
 #    """
 
-rule lsBamRecal:
-  input: 
-  output:
-    'vars/bam.recal.list'
-  message: """--- creating recalibrated sample list for variant calling ---"""
-  shell:
-    """
-    ls bbmap/all/*.recal.bam > vars/bam.recal.list  
-    """
+#rule lsBamRecal:
+#  input: 
+#  output:
+#    'vars/bam.recal.list'
+#  message: """--- creating recalibrated sample list for variant calling ---"""
+#  shell:
+#    """
+#    ls bbmap/all/*.recal.bam > vars/bam.recal.list  
+#    """
 
 #
 #rule callVars2:
