@@ -19,7 +19,7 @@ map:
   mem: "240gb"
   walltime: "72:00:00"
 
-callVars1:
+callVars:
   ncpus: 24
   mem: "240gb"
   walltime: "72:00:00"
