@@ -6,6 +6,6 @@ rule vcf2zarr:
   message: """--- Converting vcf into zarr format ---"""
   shell:
     """
-    vcf2zarr.py ...
+    vcf2zarr.py {input.vcf} {output.    }
     """
 
