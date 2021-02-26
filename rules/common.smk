@@ -2,6 +2,17 @@ import os
 import pandas as pd
 from glob import glob
 import shutil 
+import allel as al
+import numpy as np
+import scipy.spatial
+%matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+import random
+import sys
+
+sns.set_style("whitegrid")
+random.seed(44)
 
 ###### Config file and sample sheets #####
 

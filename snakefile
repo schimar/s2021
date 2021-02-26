@@ -17,6 +17,8 @@ rule all:
 	    'vars/bam.list',
 	    'vars/ta_init.vcf',
 	    expand('vars/ta{type}.vcf', type=['SubInDel', 'InDel', 'Sub']),
+	    expand('vars/ta{type}/.zgroup', type=['SubInDel', 'InDel', 'Sub']),
+
 
 
 

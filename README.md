@@ -19,6 +19,10 @@ conda env create -f envs/s21.yaml
 conda activate ta
 
 # (also, when ssh'ing onto mach2, you can activate the env and then do a dry-run of your workflow) 
+
+
+# if you've added new software to install to the conda environment, then you can update:
+conda env update --name ta --file envs/s21.yaml
 ```
 
 ## how to submit the main snakemake job:
