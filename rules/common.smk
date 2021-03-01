@@ -5,7 +5,7 @@ import shutil
 import allel as al
 import numpy as np
 import scipy.spatial
-%matplotlib
+##%matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
 import random
