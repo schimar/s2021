@@ -17,7 +17,7 @@ rule all:
 	    'vars/bam.list',
 	    'vars/ta_init.vcf',
 	    expand('vars/ta{type}.vcf', type=['SubInDel', 'InDel', 'Sub']),
-	    expand('vars/ta{type}/.zgroup', type=['SubInDel', 'InDel', 'Sub']),
+	    expand('vars/ta{type}.zarr/.zgroup', type=['SubInDel', 'InDel', 'Sub']),
 
 
 
@@ -27,7 +27,7 @@ rule all:
 
 include: "rules/hts.smk"
 include: "rules/vars.smk"
-
+include: "rules/stats.smk"
 
 
 

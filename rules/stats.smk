@@ -6,9 +6,10 @@ rule vcf2zarr:
   message: """--- Converting vcf into zarr format ---"""
   shell:
     """
-    echo '{input.vcf}.zarr'
-    script/vcf2zarr.py {input.vcf}
+      python script/vcf2zarr.py {input.vcf}
     """
+
+##echo '{input.vcf}.zarr'
 
 
 rule allelStats:

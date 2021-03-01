@@ -1,4 +1,9 @@
 import os
+import numexpr
+os.environ["NUMEXPR_MAX_THREADS"]="272"
+#if 'NUMEXPR_MAX_THREADS' in os.environ: os.environ.pop('NUMEXPR_MAX_THREADS')
+#import numexpr
+#print('NumExpr.nthreads =' + str(numexpr.nthreads))
 import pandas as pd
 from glob import glob
 import shutil 
