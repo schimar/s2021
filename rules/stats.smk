@@ -2,14 +2,13 @@ rule vcf2zarr:
   input:
     vcf = 'vars/ta{vartype}.vcf'
   output:
-    'vars/ta{vartype}/.zgroup'
+    'vars/ta{vartype}.zarr/.zgroup'
   message: """--- Converting vcf into zarr format ---"""
   shell:
     """
-    echo 'hello'
-##vcf2zarr.py {input.vcf} {output.    }
+    echo '{input.vcf}.zarr'
+    script/vcf2zarr.py {input.vcf}
     """
-
 
 
 rule allelStats:
