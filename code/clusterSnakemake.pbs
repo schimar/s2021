@@ -54,7 +54,7 @@ source $UIBK_CONDA_PROFILE
 
 #conda init bash
 
-conda activate ta
+conda activate smk6
 
 
 
