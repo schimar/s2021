@@ -72,8 +72,28 @@ rule filtVarsALL:
     """
 
 
+rule sortIDsByPop:
+  input:
+    'samples109.txt'
+  output:
+    'vars/tapopsOrd.txt'
+  message: """--- Creating list of ids & nests ordered by nests ---"""
+  shell:
+    """
+    grep -v 'id' {input} | cut -f3,4 | sort -k2 > {output}
+    """
 
 
+rule sortVcfbyPop:
+  input:
+    vcf = 'vars/ta{vartype}.vcf'
+  output:
+    vcfByPop = 'ta{vartype}Bypop.vcf'
+  message: """--- Sorting vcf file by individuals & pops ---"""
+  shell:
+    """
+    script/sortVcfByPop.py {input.vcf} {input.idsPops} > {output.vcfByPop}
+    """
 
 
 #rule qualCalc:
