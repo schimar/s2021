@@ -86,9 +86,10 @@ rule sortIDsByPop:
 
 rule sortVcfbyPop:
   input:
-    vcf = 'vars/ta{vartype}.vcf'
+    vcf = 'vars/ta{vartype}.vcf',
+    idsPops = 'vars/tapopsOrd.txt'
   output:
-    vcfByPop = 'ta{vartype}Bypop.vcf'
+    vcfByPop = 'vars/ta{vartype}Bypop.vcf'
   message: """--- Sorting vcf file by individuals & pops ---"""
   shell:
     """
