@@ -80,7 +80,7 @@ rule sortIDsByPop:
   message: """--- Creating list of ids & nests ordered by nests ---"""
   shell:
     """
-    grep -v 'id' {input} | cut -f3,4 | sort -k2 > {output}
+    grep -v 'id' {input} | cut -f3,4 | sort -k2 | awk 'BEGIN {{ OFS=FS="\t" }} {{$2=$2 "\t" $2 }} 1' | sed -E 's/([[:alpha:]])\t/\1_/g' > {output}
     """
 
 
@@ -93,7 +93,7 @@ rule sortVcfbyPop:
   message: """--- Sorting vcf file by individuals & pops ---"""
   shell:
     """
-    script/sortVcfByPop.py {input.vcf} {input.idsPops} > {output.vcfByPop}
+   python script/sortVcfByPop.py {input.vcf} {input.idsPops} > {output.vcfByPop}
     """
 
 
