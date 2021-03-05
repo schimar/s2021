@@ -16,7 +16,7 @@ with open(argv[2], 'rb') as ids:
     #n_ind = 0
     for line in ids:
         line = bytes.decode(line).strip('\n')
-        ind, pop = line.split(' ')
+        ind, pop = line.split('\t')
         if not pop in dpops:
             dpops[pop] = [ ind ]
         else:
