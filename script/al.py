@@ -122,7 +122,7 @@ g = sns.clustermap(cDdf, row_colors= rowCols, cmap= 'jet')
 g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xmajorticklabels(), fontsize = 12)     #ha= 'right', rotation= 40
 g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize = 12)
 
-
+g.savefig(os.path.join(figsPath, 'pwDist.pdf'), bbox_inches='tight')
 
 
 
