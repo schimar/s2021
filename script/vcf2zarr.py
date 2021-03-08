@@ -20,7 +20,7 @@ vcfPath = sys.argv[1]
 
 variants = al.read_vcf(vcfPath, numbers= {'GT': 2, 'ALT': 1}, fields= '*')	# with all (*) fields read
 
-zarrPath = str(vcfPath.split('.')[0] + '.zarr')
+zarrPath = str(vcfPath.split('Bypop.')[0] + '.zarr')
 al.vcf_to_zarr(vcfPath, zarrPath, fields='*', log=sys.stdout, overwrite=True)
 
 

@@ -39,12 +39,12 @@ ids = ids.sort_values(by='nest')
 
 
 nInds = ids.groupby(by= ['nest', 'pop']).count()['sample']
-np.all(list(variants['samples']) == ids['id_nest'].values)
+#np.all(list(variants['samples']) == ids['id_nest'].values)
 
 samples = list(variants['samples'])
 subsIndex = [samples.index(s) for s in ids['id_nest']]
 ids['subsIndex'] = subsIndex
-
+ids.sort_values(by=['subsIndex'], inplace= True)
 ##
 gtvars = al.GenotypeArray(variants['calldata/GT'])
 
