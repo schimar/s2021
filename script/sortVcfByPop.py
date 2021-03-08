@@ -37,7 +37,6 @@ with open(argv[1], 'rb') as file:
             linels = line.split('\t')
             newline = linels[0:9]
             vcf_inds = linels[9:len(linels)]
-            print(len(linels))
             INDex = [ vcf_inds.index(x) if x in vcf_inds else None for x in dpopsflat ]
             lineINDex = [ x+9 for x in INDex ]
             newline.extend([ vcf_inds[i] for i in INDex ])
