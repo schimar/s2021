@@ -29,6 +29,19 @@ zarrPath = sys.argv[1]
 statsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'stats/al/')
 figsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'figs/al/')
 
+folderList = [statsPath, figsPath]
+# EAFP (easier to ask for forgiveness than permission) to create folders needed
+
+for folder in folderList:
+    try:
+        os.makedirs(folder)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+
+
+
 # load the data
 variants = zarr.open_group(zarrPath, mode='r')
 
