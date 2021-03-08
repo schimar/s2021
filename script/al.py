@@ -26,8 +26,8 @@ sns.set_style('whitegrid')
 
 
 zarrPath = sys.argv[1]
-statsPath = os.path.join(zarrPath.strip('.zarr'), 'stats/al/')
-figsPath = os.path.join(zarrPath.strip('.zarr'), 'figs/al/')
+statsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'stats/al/')
+figsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'figs/al/')
 
 # load the data
 variants = zarr.open_group(zarrPath, mode='r')

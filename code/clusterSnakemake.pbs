@@ -24,7 +24,7 @@
 ####    or if you use software that is restricted to campus use.
 
 ###PBS -A c7701188
-#PBS -q f2800	
+#PBS -q f2100	
 ##fluxod
 
 #### #### ####  These are the least frequently changing options

@@ -1,6 +1,6 @@
 rule vcf2zarr:
   input:
-    vcf = 'vars/ta{vartype}.vcf'
+    vcf = 'vars/ta{vartype}Bypop.vcf'
   output:
     'vars/ta{vartype}.zarr/.zgroup'
   message: """--- Converting vcf into zarr format ---"""
@@ -14,14 +14,14 @@ rule vcf2zarr:
 
 rule allelStats:
   input:
-    vcf = 'zarr path??'
+    zarr = 'vars{vartype}.zarr'
   output:
-    '{vartype}folder/someFigs{.pdf,eps}'
+    touch("vars/ta{vartype}.al.done")
   message:
     """--- Creating scikit-allel statistics ---"""
   shell:
     """
-    allel.py
+    allel.py {input.vcf}
     """
 
 
