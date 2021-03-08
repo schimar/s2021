@@ -12,16 +12,16 @@ rule vcf2zarr:
 ##echo '{input.vcf}.zarr'
 
 
-rule allelStats:
+rule alStats:
   input:
     zarr = 'vars{vartype}.zarr'
   output:
-    touch("vars/ta{vartype}.al.done")
+    touch("vars/ta{vartype}/al.done")
   message:
     """--- Creating scikit-allel statistics ---"""
   shell:
     """
-    allel.py {input.vcf}
+    al.py {input.vcf}
     """
 
 
