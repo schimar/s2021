@@ -93,7 +93,7 @@ rule sortVcfbyPop:
   message: """--- Sorting vcf file by individuals & pops ---"""
   shell:
     """
-   python script/sortVcfByPop.py {input.vcf} {input.idsPops} > {output.vcfByPop}
+    script/sortVcfByPop.py {input.vcf} {input.idsPops} > {output.vcfByPop}
     """
 
 

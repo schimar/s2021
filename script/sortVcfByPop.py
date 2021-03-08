@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#! /usr/bin/python
 
 
 # This scripts reads a vcf file and an id file with individuals and their population affiliation (space-separated file format). Note that the id file needs to be sorted by pop (in Bash: sort -k2 id_file.txt).
@@ -37,6 +37,7 @@ with open(argv[1], 'rb') as file:
             linels = line.split('\t')
             newline = linels[0:9]
             vcf_inds = linels[9:len(linels)]
+            print(len(linels))
             INDex = [ vcf_inds.index(x) if x in vcf_inds else None for x in dpopsflat ]
             lineINDex = [ x+9 for x in INDex ]
             newline.extend([ vcf_inds[i] for i in INDex ])
