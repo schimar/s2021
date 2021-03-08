@@ -14,14 +14,14 @@ rule vcf2zarr:
 
 rule alStats:
   input:
-    zarr = 'vars{vartype}.zarr'
+    zarr = 'vars/ta{vartype}.zarr'
   output:
     touch("vars/ta{vartype}/al.done")
   message:
     """--- Creating scikit-allel statistics ---"""
   shell:
     """
-    al.py {input.vcf}
+    script/al.py {input.zarr}
     """
 
 

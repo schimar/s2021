@@ -26,19 +26,20 @@ sns.set_style('whitegrid')
 
 
 zarrPath = sys.argv[1]
-statsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'stats/al/')
-figsPath = os.path.join(zarrPath.strip('Bypop.zarr'), 'figs/al/')
 
-folderList = [statsPath, figsPath]
-# EAFP (easier to ask for forgiveness than permission) to create folders needed
 
+zarrname = zarrPath.strip('Bypop.zarr')
+
+statsP = os.path.join(zarrname, 'stats/al/')
+figsP = os.path.join(zarrname, 'figs/al/')
+pcafP = os.path.join(figsP, 'pca/')      # pca figs
+pcasP = os.path.join(statsP, 'pca/')     # pca stats
+
+# create folders
+folderList = [statsP, figsP, pcasP, pcafP]
 for folder in folderList:
-    try:
+    if not os.path.exists(folder):
         os.makedirs(folder)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-
 
 
 
@@ -97,7 +98,7 @@ gtseg_is_het = pd.DataFrame(gtseg_vars.is_het()).describe().transpose()
 gtseg_is_het.index = ids['id_nest']
 gtseg_is_het['het'] = gtseg_is_het['freq']/gtseg_is_het['count']
 gtseg_is_het['hom'] = 1-gtseg_is_het['het']
-gtseg_is_het.to_csv(os.path.join(statsPath, 'nSegHets.txt'), header=True, index=True, sep= '\t')
+gtseg_is_het.to_csv(os.path.join(statsP, 'nSegHets.txt'), header=True, index=True, sep= '\t')
 
 
 
@@ -107,18 +108,18 @@ ac_nests_vars = gtvars.count_alleles_subpops(nests, max_allele=1)
 popseg = dict()
 for pop in ac_pops_vars.keys():
     popseg[pop] = ac_pops_vars[pop].count_segregating()
-pd.Series(popseg, index=popseg.keys()).to_csv(os.path.join(statsPath, 'nSegAlleles.pop.txt'), header= False, index=True, sep= '\t')
+pd.Series(popseg, index=popseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.pop.txt'), header= False, index=True, sep= '\t')
 
 
 nestseg = dict()
 for nest in ac_nests_vars.keys():
     nestseg[nest] = ac_nests_vars[nest].count_segregating()
-pd.Series(nestseg, index=nestseg.keys()).to_csv(os.path.join(statsPath, 'nSegAlleles.nest.txt'), header= False, index=True, sep= '\t')
+pd.Series(nestseg, index=nestseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.nest.txt'), header= False, index=True, sep= '\t')
 
 
 
 
-# pairwise distance matrix
+#############   pairwise distance matrix   #############
 
 dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
 
@@ -135,7 +136,35 @@ g = sns.clustermap(cDdf, row_colors= rowCols, cmap= 'jet')
 g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xmajorticklabels(), fontsize = 12)     #ha= 'right', rotation= 40
 g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize = 12)
 
-g.savefig(os.path.join(figsPath, 'pwDist.pdf'), bbox_inches='tight')
+g.savefig(os.path.join(figsP, 'pwDist.pdf'), bbox_inches='tight')
+
+# ---------------------------------------------------------------------
+
+#############   PCA   #############
+
+def plot_ld(gn, title):
+    m = al.rogers_huff_r(gn) ** 2
+    ax = al.plot_pairwise_ld(m)
+    ax.set_title(title)
+    ax.savefig(os.path.join(pcafP, 'ld.pdf'), bbox_inches='tight')
+
+
+
+plot_ld(nAltVars[:1000], 'Figure X. Pairwise LD')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
