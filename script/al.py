@@ -238,7 +238,7 @@ def fig_pca(coords, model, title, pops, pcols, filetitle):
 
 # nests
 
-# PCA using SVD - LD-pruned data (168k loci)
+# PCA using SVD - LD-pruned data (59544 loci)
 coords1var, model1var = al.pca(gnuVars, n_components=10, scaler='patterson')
 
 
@@ -250,7 +250,7 @@ fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_
 coords2var, model2var = al.pca(gnrVars, n_components=10, scaler='patterson')
 
 # pops
-#fig_pca(coords2var, model2var, 'Figure 4.2. Conventional PCA', pops = ids['pops'], pcols= pop_cols)
+#fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['pops'], pcols= pop_cols)
 
 # nests
 fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['nest'], pcols= nest_cols, filetitle= 'pca_100k_rand.pdf')
@@ -306,17 +306,21 @@ plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filetitle= 'pca_all_Heat.pdf')
 ## get the Eigen values for PCAs
 
 # for all (segreg.) vars (n = 1,319,775)
-segScafs = bbvars['variants/CHROM'][:][segAll_vars]
-segBP = bbvars['variants/POS'][:][segAll_vars]
+segScafs = variants['variants/CHROM'][:][segAll_vars]
+segBP = variants['variants/POS'][:][segAll_vars]
 segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
-## for gemma: segVars.to_csv('bbvars_f1byPopSegregate.scafbp', sep= ' ', index= False, header= False)
+## for gemma: segVars.to_csv('vars_f1byPopSegregate.scafbp', sep= ' ', index= False, header= False)
 
 
 
 # write first 4 eigen values to file:
-pd.DataFrame([ x[:4] for x in coords1var ]).to_csv("bbvars_f1byPopLDpruned.eigen", sep= ' ', index= False, header= False)
+pd.DataFrame([ x[:4] for x in coords1var ]).to_csv(os.path.join(pcasP, "vars_LDprune.eigen"), sep= ' ', index= False, header= False)
 
-pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv("bbvars_f1byPop.eigen", sep= ' ', index= False, header= False)
+pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars_all.eigen"), sep= ' ', index= False, header= False)
+
+# write general shape info to file
+pd.Series([ gtvars.shape[0], gtseg_vars.shape[0], dvar.shape[0], gnuVars.shape[0] ], index= ['all', 'seg. alleles', 'pwDist shape', 'LD-pruned vars']).to_csv(os.path.join(statsP, "nVars.txt"), sep='\t', index= True, header= False)
+
 
 
 #f = plt.figure()
