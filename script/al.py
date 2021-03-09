@@ -480,10 +480,11 @@ plotPropHets(propHets, ids, filename= 'propHets.pdf')
 
 
 
+gtseg_vars = gtvars.compress(segAll_vars, axis=0)
 
 
 ############
-
+# ac_nests_vars
 ac_seg = ac_subpops['all'].compress(segAll)
 
 ac_segS = ac_subpops['S'].compress(segAll)
@@ -492,14 +493,27 @@ ac_segN = ac_subpops['N'].compress(segAll)
 
 ##########################
 
-# plot joint SFS
+# plot joint SFS for pops
+
+
+def plot_jsfs(ac, filename):
+    resSet = [value for key, value in ac.items() if key not in ['all']]
+    return(resSet.keys())
+
+    for key, value in ac.items:
+        if key == 'all':
+            continue
+        else:
+
+
+
 jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
 
 fig, ax = plt.subplots(figsize=(6, 6))
 al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
 ax.set_ylabel('Alternate allele count, N')
 ax.set_xlabel('Alternate allele count, A');
-
+fig.savefig(os.path.join(sfsP, filename), bbox_inches='tight')
 
 
 
