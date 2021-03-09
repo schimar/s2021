@@ -34,9 +34,10 @@ statsP = os.path.join(zarrname, 'stats/al/')
 figsP = os.path.join(zarrname, 'figs/al/')
 pcafP = os.path.join(figsP, 'pca/')      # pca figs
 pcasP = os.path.join(statsP, 'pca/')     # pca stats
-
+varDenseP = os.path.join(figsP, 'varDense/')
+hetfP = os.path.join(figsP, 'hets/')
 # create folders
-folderList = [statsP, figsP, pcasP, pcafP]
+folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP]
 for folder in folderList:
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -142,11 +143,11 @@ g.savefig(os.path.join(figsP, 'pwDist.pdf'), bbox_inches='tight')
 
 #############   PCA   #############
 
-def plot_ld(gn, title, filetitle):
+def plot_ld(gn, title, filename):
     m = al.rogers_huff_r(gn) ** 2
     ax = al.plot_pairwise_ld(m)
     ax.set_title(title)
-    ax.figure.savefig(os.path.join(pcafP, filetitle), bbox_inches='tight')
+    ax.figure.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
 
 
@@ -185,7 +186,7 @@ def ld_prune(gn, varInf, size, step, threshold=.1, n_iter=1):
 gnuVars, vars_ldPrd = ld_prune(nAltVars, segVars, size=50, step=20, threshold=.1, n_iter=4)
 
 
-plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filetitle= 'ld_prune.pdf')
+plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filename= 'ld_prune.pdf')
 
 
 #populations = ids['pops'].unique()
@@ -223,7 +224,7 @@ def plot_pca_coords(coords, model, pc1, pc2, ax, pops, pcols):
     ax.set_ylabel('PC%s (%.1f%%)' % (pc2+1, model.explained_variance_ratio_[pc2]*100))
 
 
-def fig_pca(coords, model, title, pops, pcols, filetitle):
+def fig_pca(coords, model, title, pops, pcols, filename):
     # plot coords for PCs 1 vs 2, 3 vs 4
     fig = plt.figure(figsize=(10, 5))
     ax = fig.add_subplot(1, 2, 1)
@@ -233,7 +234,7 @@ def fig_pca(coords, model, title, pops, pcols, filetitle):
     ax.legend(bbox_to_anchor=(1, 1), loc='upper left')
     fig.suptitle(title, y=1.02)
     fig.tight_layout()
-    fig.savefig(os.path.join(pcafP, filetitle), bbox_inches='tight')
+    fig.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
 
 # nests
@@ -242,7 +243,7 @@ def fig_pca(coords, model, title, pops, pcols, filetitle):
 coords1var, model1var = al.pca(gnuVars, n_components=10, scaler='patterson')
 
 
-fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_cols, filetitle= 'pca_LDprune.pdf')
+fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune.pdf')
 
 
 ######
@@ -253,7 +254,7 @@ coords2var, model2var = al.pca(gnrVars, n_components=10, scaler='patterson')
 #fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['pops'], pcols= pop_cols)
 
 # nests
-fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['nest'], pcols= nest_cols, filetitle= 'pca_100k_rand.pdf')
+fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_100k_rand.pdf')
 
 
 # now for the full set (gtseg_vars)
@@ -264,7 +265,7 @@ coords2allVars, model2allVars = al.pca(nAltVars, n_components=10, scaler='patter
 #fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning all variants', pops = ids['pops'], pcols= pop_cols)
 
 # nests
-fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning', pops= ids['nest'], pcols= nest_cols, filetitle= 'pca_all.pdf')
+fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning', pops= ids['nest'], pcols= nest_cols, filename= 'pca_all.pdf')
 
 
 # pca with LD pruning, without Patterson's scaling
@@ -275,7 +276,7 @@ coords3vars, model3vars = al.pca(gnuVars, n_components=10, scaler=None)
 #fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling', pops = ids['pops'], pcols= pop_cols)
 
 # nests
-fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling.', pops = ids['nest'], pcols= nest_cols, filetitle= 'pca_LDprune_noPatterson.pdf')
+fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling.', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_noPatterson.pdf')
 
 
 # randomized PCA with LD pruning
@@ -286,10 +287,10 @@ coords5vars, model5vars = al.randomized_pca(gnuVars, n_components=10, scaler='pa
 #fig_pca(coords5vars, model5vars, 'Randomized PCA', pops= ids['pops'], pcols= pop_cols)
 
 # nests
-fig_pca(coords5vars, model5vars, 'Randomized PCA LD-pruned variants', pops= ids['nest'], pcols= nest_cols, filetitle= 'pca_LDprune_rand.pdf')
+fig_pca(coords5vars, model5vars, 'Randomized PCA LD-pruned variants', pops= ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_rand.pdf')
 
 
-def plotHeatPCs(coords, ids, filetitle, PCs=4):
+def plotHeatPCs(coords, ids, filename, PCs=4):
     df = pd.DataFrame(coords[:,0:PCs].T, columns=ids, index= range(1,PCs+1))
     plt.subplots(figsize= (20,5))
     ax = sns.heatmap(df, cmap= 'plasma')
@@ -297,11 +298,11 @@ def plotHeatPCs(coords, ids, filetitle, PCs=4):
     ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=True)
     ax.set_xticklabels(ids, rotation= 40, ha= 'right', fontsize= 8)
     plt.tight_layout()
-    plt.savefig(os.path.join(pcafP, filetitle), bbox_inches='tight')
+    plt.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
 
-plotHeatPCs(coords1var, ids['nest'], PCs=5, filetitle= 'pca_LDprune_Heat.pdf')
-plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filetitle= 'pca_all_Heat.pdf')
+plotHeatPCs(coords1var, ids['nest'], PCs=5, filename= 'pca_LDprune_Heat.pdf')
+plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filename= 'pca_all_Heat.pdf')
 
 ## get the Eigen values for PCAs
 
@@ -320,6 +321,107 @@ pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars
 
 # write general shape info to file
 pd.Series([ gtvars.shape[0], gtseg_vars.shape[0], dvar.shape[0], gnuVars.shape[0] ], index= ['all', 'seg. alleles', 'pwDist shape', 'LD-pruned vars']).to_csv(os.path.join(statsP, "nVars.txt"), sep='\t', index= True, header= False)
+
+
+
+
+######################
+
+# plot variant density
+
+
+def plot_windowed_variant_density(pos, window_size, filename, title=None):
+
+    # setup windows
+    bins = np.arange(0, pos.max(), window_size)
+
+    # use window midpoints as x coordinate
+    x = (bins[1:] + bins[:-1])/2
+
+    # compute variant density in each window
+    h, _ = np.histogram(pos, bins=bins)
+    y = h / window_size
+
+    # plot
+    fig, ax = plt.subplots(figsize=(12, 3))
+    sns.despine(ax=ax, offset=10)
+    ax.plot(x, y)
+    ax.set_xlabel('Chromosome position (bp)')
+    ax.set_ylabel('Variant density (bp$^{-1}$)')
+    if title:
+        ax.set_title(title)
+    fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
+
+pos = variants['variants/POS'][:]
+# probably have to subset individual scaffolds for this to have more meaning
+plot_windowed_variant_density(pos, window_size=100000, title='Raw variant density', filename= 'varDensity_window100k.pdf')
+
+
+
+def plot_variant_hist(f, filename, bins=30):
+    x = variants[os.path.join('variants',f)][:]
+    fig, ax = plt.subplots(figsize=(7, 5))
+    sns.despine(ax=ax, offset=10)
+    ax.hist(x, bins=bins)
+    ax.set_xlabel(f)
+    ax.set_ylabel('No. variants')
+    ax.set_title('Variant %s distribution' % f)
+    fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
+
+plot_variant_hist('DP', bins= 100, filename= 'va_DP_hist.pdf')
+plot_variant_hist('AF', filename= 'var_AF_hist.pdf')
+
+
+# plot joint frequency distribution of two variables
+def plot_variant_hist_2d(f1, f2, downsample, filename):
+    x = variants[os.path.join('variants',f1)][:][::downsample]
+    y = variants[os.path.join('variants',f2)][:][::downsample]
+    fig, ax = plt.subplots(figsize=(6, 6))
+    sns.despine(ax=ax, offset=10)
+    ax.hexbin(x, y, gridsize=40)
+    ax.set_xlabel(f1)
+    ax.set_ylabel(f2)
+    ax.set_title('Variant %s versus %s joint distribution' % (f1, f2))
+    fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
+
+plot_variant_hist_2d('MCOV', 'MQM', downsample=10, filename= 'varDensity_MCOV_MQM_hist2d.pdf')
+
+# Ti vs Tv
+
+#mutations = np.char.add(variants['variants/REF'], variants['variants/ALT'][:, 0])
+
+
+#######################
+
+## count the number (and proportion) of heterozygous calls
+
+#gtvars.count_het(axis=0)     # axis (0 = across loci, 1 = across samples)
+
+propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
+
+# plot the proportion of heterozygous genotypes
+
+
+def plotPropHets(propHets, ids, filename):
+    plt.subplots(figsize= (20,5))
+    ax = sns.barplot(np.arange(len(propHets)), propHets, hue= ids['nest'], dodge= False)
+    ax.set_ylim([0,1])
+    ax.set_xlabel('samples')
+    ax.set_ylabel('proportion heterozygous')
+    ax.set_title('proportion of heterozygous genotype calls')
+    #ax.set_xticks(np.arange(len(propHets)))
+    ax.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=True)
+    ax.set_xticklabels(ids['id_nest'], rotation= 40, ha= 'right', fontsize= 8)
+    ax.figure.savefig(os.path.join(hetfP, filename), bbox_inches='tight')
+
+
+plotPropHets(propHets, ids, filename= 'propHets.pdf')
+
 
 
 
