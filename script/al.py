@@ -9,6 +9,7 @@ import random
 random.seed(42)
 import sys
 import allel as al
+from itertools import combinations
 import numpy as np
 np.random.seed(42)
 import pandas as pd
@@ -36,8 +37,10 @@ pcafP = os.path.join(figsP, 'pca/')      # pca figs
 pcasP = os.path.join(statsP, 'pca/')     # pca stats
 varDenseP = os.path.join(figsP, 'varDense/')
 hetfP = os.path.join(figsP, 'hets/')
+sfsP = os.path.join(figsP, 'jsfs/')
+
 # create folders
-folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP]
+folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP]
 for folder in folderList:
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -497,23 +500,26 @@ ac_segN = ac_subpops['N'].compress(segAll)
 
 
 def plot_jsfs(ac, filename):
-    resSet = [value for key, value in ac.items() if key not in ['all']]
-    return(resSet.keys())
+    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    combs = list(combinations(tmpDict, 2))
+    for popPair in combs:
+        jsfs = al.stats.sf.joint_sfs(ac[popPair[0]][:,1], ac[popPair[1]][:,1])
+        fig, ax = plt.subplots(figsize=(6,6))
+        al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+        ax.set_ylabel(' '.join(['Alternate allele count,', popPair[0] ]))
+        ax.set_xlabel(' '.join(['Alternate allele count,', popPair[1] ]))
+        fig.savefig(os.path.join(sfsP, '_'.join([popPair[0], popPair[1], filename])), bbox_inches='tight')
 
-    for key, value in ac.items:
-        if key == 'all':
-            continue
-        else:
 
+plot_jsfs(ac_pops_vars, filename= 'jsfs.pdf')
 
-
-jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
-
-fig, ax = plt.subplots(figsize=(6, 6))
-al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
-ax.set_ylabel('Alternate allele count, N')
-ax.set_xlabel('Alternate allele count, A');
-fig.savefig(os.path.join(sfsP, filename), bbox_inches='tight')
+#jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
+#
+#fig, ax = plt.subplots(figsize=(6, 6))
+#al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+#ax.set_ylabel('Alternate allele count, N')
+#ax.set_xlabel('Alternate allele count, A');
+#fig.savefig(os.path.join(sfsP, filename), bbox_inches='tight')
 
 
 
