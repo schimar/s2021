@@ -564,7 +564,8 @@ plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 #plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
 
-# sample code for the above (from https://stackoverflow.com/questions/3584805/in-matplotlib-what-does-the-argument-mean-in-fig-add-subplot111#11404223)
+# sample code for the above (from https://stackoverflow.com/questions/19053077/looping-over-data-and-creating-individual-figures#19053157 )
+
 #fig = plt.figure()
 #ax = fig.addsubplot(111)
 #
