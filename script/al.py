@@ -425,58 +425,56 @@ plotPropHets(propHets, ids, filename= 'propHets.pdf')
 
 
 
-def plot_genotype_frequency_pops(pc, title):
-    fig, ax = plt.subplots(figsize=(12, 4))
-    sns.despine(ax=ax, offset=10)
-    left = np.arange(len(pc))
-    palette = sns.color_palette()
-    pop2color = {'A': palette[0], 'N': palette[1], 'S': palette[2]}
-    colors = [pop2color[p] for p in ids['pops'] ]
-    ax.bar(left, pc, color=colors)
-    ax.set_xlim(0, len(pc))
-    ax.set_xlabel('Sample index')
-    ax.set_ylabel('Percent calls')
-    ax.set_title(title)
-    handles = [mpl.patches.Patch(color=palette[0]),
-               mpl.patches.Patch(color=palette[1]),
-               mpl.patches.Patch(color=palette[2])]
-    ax.legend(handles=handles, labels=list(np.unique(ids['pops'])), title='Population',
-              bbox_to_anchor=(1, 1), loc='upper left')
+#def plot_genotype_frequency_pops(pc, title):
+#    fig, ax = plt.subplots(figsize=(12, 4))
+#    sns.despine(ax=ax, offset=10)
+#    left = np.arange(len(pc))
+#    palette = sns.color_palette()
+#    pop2color = {'A': palette[0], 'N': palette[1], 'S': palette[2]}
+#    colors = [pop2color[p] for p in ids['pop'] ]
+#    ax.bar(left, pc, color=colors)
+#    ax.set_xlim(0, len(pc))
+#    ax.set_xlabel('Sample index')
+#    ax.set_ylabel('Percent calls')
+#    ax.set_title(title)
+#    handles = [mpl.patches.Patch(color=palette[0]),
+#               mpl.patches.Patch(color=palette[1]),
+#               mpl.patches.Patch(color=palette[2])]
+#    ax.legend(handles=handles, labels=list(np.unique(ids['pop'])), title='Population',
+#              bbox_to_anchor=(1, 1), loc='upper left')
 
 
-#plot_genotype_frequency(missing, 'Missing')
+##plot_genotype_frequency(missing, 'Missing')
+#plot_genotype_frequency_pops(propHets, 'Heterozygous')
 
 
-plot_genotype_frequency(propHet, 'Heterozygous')
-
-
-def plot_genotype_frequency_nests(pc, title):
-    fig, ax = plt.subplots(figsize=(12, 4))
-    sns.despine(ax=ax, offset=10)
-    left = np.arange(len(pc))
-    palette = sns.color_palette()
-    # change here
-    pop2color = dict(zip(np.unique(ids['nest']), palette))
-    colors = [pop2color[p] for p in ids['nest'] ]
-    ax.bar(left, pc, color=colors)
-    ax.set_xlim(0, len(pc))
-    ax.set_xlabel('Sample index')
-    ax.set_ylabel('Percent calls')
-    ax.set_title(title)
-    handles = [mpl.patches.Patch(color=palette[0]),
-               mpl.patches.Patch(color=palette[1]),
-               mpl.patches.Patch(color=palette[2]),
-               mpl.patches.Patch(color=palette[3]),
-               mpl.patches.Patch(color=palette[4]),
-               mpl.patches.Patch(color=palette[5]),
-               mpl.patches.Patch(color=palette[6]),
-               mpl.patches.Patch(color=palette[7]),
-               mpl.patches.Patch(color=palette[8])]
-    ax.legend(handles=handles, labels=list(np.unique(ids['nest'])), title='Nests',
-              bbox_to_anchor=(1, 1), loc='upper left')
-
-
-plot_genotype_frequency_nests(pc_het, 'Heterozygous')
+#def plot_genotype_frequency_nests(pc, title):
+#    fig, ax = plt.subplots(figsize=(12, 4))
+#    sns.despine(ax=ax, offset=10)
+#    left = np.arange(len(pc))
+#    palette = sns.color_palette()
+#    # change here
+#    pop2color = dict(zip(np.unique(ids['nest']), palette))
+#    colors = [pop2color[p] for p in ids['nest'] ]
+#    ax.bar(left, pc, color=colors)
+#    ax.set_xlim(0, len(pc))
+#    ax.set_xlabel('Sample index')
+#    ax.set_ylabel('Percent calls')
+#    ax.set_title(title)
+#    handles = [mpl.patches.Patch(color=palette[0]),
+#               mpl.patches.Patch(color=palette[1]),
+#               mpl.patches.Patch(color=palette[2]),
+#               mpl.patches.Patch(color=palette[3]),
+#               mpl.patches.Patch(color=palette[4]),
+#               mpl.patches.Patch(color=palette[5]),
+#               mpl.patches.Patch(color=palette[6]),
+#               mpl.patches.Patch(color=palette[7]),
+#               mpl.patches.Patch(color=palette[8])]
+#    ax.legend(handles=handles, labels=list(np.unique(ids['nest'])), title='Nests',
+#              bbox_to_anchor=(1, 1), loc='upper left')
+#
+#
+#plot_genotype_frequency_nests(propHets, 'Heterozygous')
 
 
 
