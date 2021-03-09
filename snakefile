@@ -21,6 +21,7 @@ rule all:
         'vars/tapopsOrd.txt',
         expand('vars/ta{vartype}Bypop.vcf', vartype=['SubInDel', 'InDel', 'Sub']),
 	    expand('vars/ta{vartype}/al.done', vartype=['SubInDel', 'InDel', 'Sub']),
+	    #expand('vars/ta{vartype}/stats/al/vars_Segregate.gemma.scafbp', vartype=['SubInDel', 'InDel', 'Sub']), ### output for rule alStats and input for rule gemma
 
 
 

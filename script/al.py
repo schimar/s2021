@@ -23,13 +23,25 @@ import seaborn as sns
 sns.set_style('whitegrid')
 #sns.set_style('ticks')
 #sns.set_context('notebook')
+# --------------
+
+# Plotting pretty figures and avoid blurry images
+%config InlineBackend.figure_format = 'retina'
+# No need to include %matplotlib inline magic command. These things come built-in now.
+
+# Ignore warnings
+import warnings
+warnings.filterwarnings('ignore')
+
+
 # --------------------------------------------
 
 
 zarrPath = sys.argv[1]
 
 
-zarrname = zarrPath.strip('Bypop.zarr')
+zarrname = zarrPath.strip('.zarr/')
+# create folders
 
 statsP = os.path.join(zarrname, 'stats/al/')
 figsP = os.path.join(zarrname, 'figs/al/')
@@ -39,7 +51,6 @@ varDenseP = os.path.join(figsP, 'varDense/')
 hetfP = os.path.join(figsP, 'hets/')
 sfsP = os.path.join(figsP, 'jsfs/')
 
-# create folders
 folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP]
 for folder in folderList:
     if not os.path.exists(folder):
@@ -298,8 +309,8 @@ def plotHeatPCs(coords, ids, filename, PCs=4):
     plt.subplots(figsize= (20,5))
     ax = sns.heatmap(df, cmap= 'plasma')
     ax.set_ylabel('PC')
-    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=True)
-    ax.set_xticklabels(ids, rotation= 40, ha= 'right', fontsize= 8)
+    #ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=True)
+    #ax.set_xticklabels(ids, rotation= 40, ha= 'right', fontsize= 8)
     plt.tight_layout()
     plt.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
@@ -313,7 +324,8 @@ plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filename= 'pca_all_Heat.pdf')
 segScafs = variants['variants/CHROM'][:][segAll_vars]
 segBP = variants['variants/POS'][:][segAll_vars]
 segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
-## for gemma: segVars.to_csv('vars_f1byPopSegregate.scafbp', sep= ' ', index= False, header= False)
+## for gemma:
+segVars.to_csv(os.path.join(statsP, 'vars_Segregate.gemma.scafbp'), sep= ' ', index= False, header= False)
 
 
 
@@ -531,67 +543,54 @@ def plot_jsfs_nests(ac, fname):
 
 plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
-# combine plots for each pop in one figure
+# combine plots for each pop in one figure (we'll deal with this, once we've decided what will be used...
 
-def plot_jsfs_nests(ac, fname):
-    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
-    for pop in ['A', 'N', 'S']:
-        popDict = { k: v for k, v in tmpDict.items() if pop in k }
-        nestCombs = list(combinations(popDict, 2))
-        fig = plt.figure(figsize=(15, 5))
-
-        for i, nestPair in enumerate(nestCombs):
-            print(i, nestPair)
-            ax = fig.add_subplot(1,3,i+1)
-            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
-            #fig, ax = plt.subplots(figsize=(6,6))
-            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
-            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
-            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
-            ax.cla()
-        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'pdf' ])), bbox_inches='tight')
-        ##p.remove()
-
-
-plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
-
-
-
-fig = plt.figure()
-ax = fig.addsubplot(111)
-
-# Tinker with labels and spines
-ax.set_xlabel(...)
-ax.set_ylabel(...)
-[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
-...
-
-# Plot data and save figures
-for mol in mols:
-    for energy, density in data:
-        ax.cla() # or ax.clear()
-        p, = ax.plot(density, energy, 'ro')
-
-        fig.savefig(mol+".png")
-        p.remove() # rem
-
-
-#[ v for k,v in my_dict.items() if 'Date' in k]
-
-
-
-#jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
+#def plot_jsfs_nests(ac, fname):
+#    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+#    for pop in ['A', 'N', 'S']:
+#        popDict = { k: v for k, v in tmpDict.items() if pop in k }
+#        nestCombs = list(combinations(popDict, 2))
+#        fig = plt.figure(figsize=(15, 5))
 #
-#fig, ax = plt.subplots(figsize=(6, 6))
-#al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
-#ax.set_ylabel('Alternate allele count, N')
-#ax.set_xlabel('Alternate allele count, A');
-#fig.savefig(os.path.join(sfsP, filename), bbox_inches='tight')
-
-
-
-#f = plt.figure()
-#plt.plot(range(10), range(10), "o")
-#plt.show()
+#        for i, nestPair in enumerate(nestCombs):
+#            print(i, nestPair)
+#            ax = fig.add_subplot(1,3,i+1)
+#            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
+#            #fig, ax = plt.subplots(figsize=(6,6))
+#            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+#            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
+#            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
+#            ax.cla()
+#        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'pdf' ])), bbox_inches='tight')
+#        ##p.remove()
 #
-#f.savefig("foo.pdf", bbox_inches='tight')
+#
+#plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
+
+
+# sample code for the above (from https://stackoverflow.com/questions/3584805/in-matplotlib-what-does-the-argument-mean-in-fig-add-subplot111#11404223)
+#fig = plt.figure()
+#ax = fig.addsubplot(111)
+#
+## Tinker with labels and spines
+#ax.set_xlabel(...)
+#ax.set_ylabel(...)
+#[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
+#...
+#
+## Plot data and save figures
+#for mol in mols:
+#    for energy, density in data:
+#        ax.cla() # or ax.clear()
+#        p, = ax.plot(density, energy, 'ro')
+#
+#        fig.savefig(mol+".png")
+#        p.remove() # rem
+
+
+
+
+
+
+
+
