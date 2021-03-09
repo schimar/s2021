@@ -368,7 +368,7 @@ def plot_variant_hist(f, filename, bins=30):
     ax.set_title('Variant %s distribution' % f)
     fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
 
-plot_variant_hist('DP', bins= 100, filename= 'va_DP_hist.pdf')
+plot_variant_hist('DP', bins= 100, filename= 'var_DP_hist.pdf')
 plot_variant_hist('AF', filename= 'var_AF_hist.pdf')
 
 
@@ -398,6 +398,7 @@ plot_variant_hist_2d('MCOV', 'MQM', downsample=10, filename= 'varDensity_MCOV_MQ
 #gtvars.count_het(axis=0)     # axis (0 = across loci, 1 = across samples)
 
 propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
+#missing = gtsub.count_missing(axis=0)[:] / len(gtvars)
 
 # plot the proportion of heterozygous genotypes
 
@@ -421,6 +422,85 @@ def plotPropHets(propHets, ids, filename):
 
 
 plotPropHets(propHets, ids, filename= 'propHets.pdf')
+
+
+
+def plot_genotype_frequency_pops(pc, title):
+    fig, ax = plt.subplots(figsize=(12, 4))
+    sns.despine(ax=ax, offset=10)
+    left = np.arange(len(pc))
+    palette = sns.color_palette()
+    pop2color = {'A': palette[0], 'N': palette[1], 'S': palette[2]}
+    colors = [pop2color[p] for p in ids['pops'] ]
+    ax.bar(left, pc, color=colors)
+    ax.set_xlim(0, len(pc))
+    ax.set_xlabel('Sample index')
+    ax.set_ylabel('Percent calls')
+    ax.set_title(title)
+    handles = [mpl.patches.Patch(color=palette[0]),
+               mpl.patches.Patch(color=palette[1]),
+               mpl.patches.Patch(color=palette[2])]
+    ax.legend(handles=handles, labels=list(np.unique(ids['pops'])), title='Population',
+              bbox_to_anchor=(1, 1), loc='upper left')
+
+
+#plot_genotype_frequency(missing, 'Missing')
+
+
+plot_genotype_frequency(propHet, 'Heterozygous')
+
+
+def plot_genotype_frequency_nests(pc, title):
+    fig, ax = plt.subplots(figsize=(12, 4))
+    sns.despine(ax=ax, offset=10)
+    left = np.arange(len(pc))
+    palette = sns.color_palette()
+    # change here
+    pop2color = dict(zip(np.unique(ids['nest']), palette))
+    colors = [pop2color[p] for p in ids['nest'] ]
+    ax.bar(left, pc, color=colors)
+    ax.set_xlim(0, len(pc))
+    ax.set_xlabel('Sample index')
+    ax.set_ylabel('Percent calls')
+    ax.set_title(title)
+    handles = [mpl.patches.Patch(color=palette[0]),
+               mpl.patches.Patch(color=palette[1]),
+               mpl.patches.Patch(color=palette[2]),
+               mpl.patches.Patch(color=palette[3]),
+               mpl.patches.Patch(color=palette[4]),
+               mpl.patches.Patch(color=palette[5]),
+               mpl.patches.Patch(color=palette[6]),
+               mpl.patches.Patch(color=palette[7]),
+               mpl.patches.Patch(color=palette[8])]
+    ax.legend(handles=handles, labels=list(np.unique(ids['nest'])), title='Nests',
+              bbox_to_anchor=(1, 1), loc='upper left')
+
+
+plot_genotype_frequency_nests(pc_het, 'Heterozygous')
+
+
+
+
+
+
+
+############
+
+ac_seg = ac_subpops['all'].compress(segAll)
+
+ac_segS = ac_subpops['S'].compress(segAll)
+ac_segA = ac_subpops['A'].compress(segAll)
+ac_segN = ac_subpops['N'].compress(segAll)
+
+##########################
+
+# plot joint SFS
+jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
+
+fig, ax = plt.subplots(figsize=(6, 6))
+al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+ax.set_ylabel('Alternate allele count, N')
+ax.set_xlabel('Alternate allele count, A');
 
 
 
