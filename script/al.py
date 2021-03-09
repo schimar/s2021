@@ -510,8 +510,53 @@ def plot_jsfs(ac, fname):
         ax.set_xlabel(' '.join(['Alternate allele count,', popPair[1] ]))
         fig.savefig(os.path.join(sfsP, '.'.join([fname, popPair[0], popPair[1], 'pdf' ])), bbox_inches='tight')
 
-
 plot_jsfs(ac_pops_vars, fname= 'jsfs')
+
+
+
+
+def plot_jsfs_nests(ac, fname):
+    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    for pop in ['A', 'N', 'S']:
+        popDict = { k: v for k, v in tmpDict.items() if pop in k }
+        nestCombs = list(combinations(popDict, 2))
+        for nestPair in nestCombs:
+
+            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
+            fig, ax = plt.subplots(figsize=(6,6))
+            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
+            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
+            fig.savefig(os.path.join(sfsP, '.'.join([fname, nestPair[0], nestPair[1], 'pdf' ])), bbox_inches='tight')
+
+
+plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
+
+
+
+
+fig = plt.figure()
+ax = fig.addsubplot(111)
+
+# Tinker with labels and spines
+ax.set_xlabel(...)
+ax.set_ylabel(...)
+[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
+...
+
+# Plot data and save figures
+for mol in mols:
+    for energy, density in data:
+        ax.cla() # or ax.clear()
+        p, = ax.plot(density, energy, 'ro')
+
+        fig.savefig(mol+".png")
+        p.remove() # rem
+
+
+#[ v for k,v in my_dict.items() if 'Date' in k]
+
+
 
 #jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
 #
