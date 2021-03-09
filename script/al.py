@@ -404,7 +404,7 @@ propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
 
 def plotPropHets(propHets, ids, filename):
     plt.subplots(figsize= (20,5))
-    ax = sns.barplot(np.arange(len(propHets)), propHets, hue= ids['nest'], dodge= False)
+    ax = sns.barplot(np.arange(len(propHets)), propHets, hue= ids['nest'].values, dodge= False)
     ax.set_ylim([0,1])
     ax.set_xlabel('samples')
     ax.set_ylabel('proportion heterozygous')
@@ -416,7 +416,7 @@ def plotPropHets(propHets, ids, filename):
         bottom=False,      # ticks along the bottom edge are off
         top=False,         # ticks along the top edge are off
         labelbottom=True)
-    ax.set_xticklabels(ids['id_nest'], rotation= 40, ha= 'right', fontsize= 8)
+    ax.set_xticklabels(ids['id_nest'].values, rotation= 40, ha= 'right', fontsize= 8)
     ax.figure.savefig(os.path.join(hetfP, filename), bbox_inches='tight')
 
 
