@@ -521,7 +521,6 @@ def plot_jsfs_nests(ac, fname):
         popDict = { k: v for k, v in tmpDict.items() if pop in k }
         nestCombs = list(combinations(popDict, 2))
         for nestPair in nestCombs:
-
             jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
             fig, ax = plt.subplots(figsize=(6,6))
             al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
@@ -532,6 +531,29 @@ def plot_jsfs_nests(ac, fname):
 
 plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
+# combine plots for each pop in one figure
+
+def plot_jsfs_nests(ac, fname):
+    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    for pop in ['A', 'N', 'S']:
+        popDict = { k: v for k, v in tmpDict.items() if pop in k }
+        nestCombs = list(combinations(popDict, 2))
+        fig = plt.figure(figsize=(15, 5))
+
+        for i, nestPair in enumerate(nestCombs):
+            print(i, nestPair)
+            ax = fig.add_subplot(1,3,i+1)
+            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
+            #fig, ax = plt.subplots(figsize=(6,6))
+            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
+            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
+            ax.cla()
+        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'pdf' ])), bbox_inches='tight')
+        ##p.remove()
+
+
+plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
 
 
