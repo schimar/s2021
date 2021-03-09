@@ -502,10 +502,6 @@ gtseg_vars = gtvars.compress(segAll_vars, axis=0)
 # ac_nests_vars
 #ac_seg = ac_subpops['all'].compress(segAll)
 #
-#ac_segS = ac_subpops['S'].compress(segAll)
-#ac_segA = ac_subpops['A'].compress(segAll)
-#ac_segN = ac_subpops['N'].compress(segAll)
-
 ##########################
 
 # plot joint SFS for pops
@@ -589,8 +585,13 @@ plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
 
 
+################
 
+# Fst
 
+# estimate variance components from gt data
+a, b, c, = al.weir_cockerham_fst(gtseg, list(subpops.values())[1:])
 
-
+# estimate theta (a.k.a. Fst) for each variant & allele directly:
+fst = a / (a + b + c)
 
