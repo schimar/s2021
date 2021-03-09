@@ -488,18 +488,18 @@ gtseg_vars = gtvars.compress(segAll_vars, axis=0)
 
 ############
 # ac_nests_vars
-ac_seg = ac_subpops['all'].compress(segAll)
-
-ac_segS = ac_subpops['S'].compress(segAll)
-ac_segA = ac_subpops['A'].compress(segAll)
-ac_segN = ac_subpops['N'].compress(segAll)
+#ac_seg = ac_subpops['all'].compress(segAll)
+#
+#ac_segS = ac_subpops['S'].compress(segAll)
+#ac_segA = ac_subpops['A'].compress(segAll)
+#ac_segN = ac_subpops['N'].compress(segAll)
 
 ##########################
 
 # plot joint SFS for pops
 
 
-def plot_jsfs(ac, filename):
+def plot_jsfs(ac, fname):
     tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
     combs = list(combinations(tmpDict, 2))
     for popPair in combs:
@@ -508,10 +508,10 @@ def plot_jsfs(ac, filename):
         al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
         ax.set_ylabel(' '.join(['Alternate allele count,', popPair[0] ]))
         ax.set_xlabel(' '.join(['Alternate allele count,', popPair[1] ]))
-        fig.savefig(os.path.join(sfsP, '_'.join([popPair[0], popPair[1], filename])), bbox_inches='tight')
+        fig.savefig(os.path.join(sfsP, '.'.join([fname, popPair[0], popPair[1], 'pdf' ])), bbox_inches='tight')
 
 
-plot_jsfs(ac_pops_vars, filename= 'jsfs.pdf')
+plot_jsfs(ac_pops_vars, fname= 'jsfs')
 
 #jsfs = al.stats.sf.joint_sfs(ac_segN[:, 1], ac_segA[:, 1])
 #
