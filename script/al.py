@@ -26,136 +26,14 @@ sns.set_style('whitegrid')
 # --------------
 
 # Plotting pretty figures and avoid blurry images
-%config InlineBackend.figure_format = 'retina'
+#%config InlineBackend.figure_format = 'retina'
 # No need to include %matplotlib inline magic command. These things come built-in now.
 
 # Ignore warnings
 import warnings
 warnings.filterwarnings('ignore')
 
-
 # --------------------------------------------
-
-
-zarrPath = sys.argv[1]
-
-
-zarrname = zarrPath.strip('.zarr/')
-# create folders
-
-statsP = os.path.join(zarrname, 'stats/al/')
-figsP = os.path.join(zarrname, 'figs/al/')
-pcafP = os.path.join(figsP, 'pca/')      # pca figs
-pcasP = os.path.join(statsP, 'pca/')     # pca stats
-varDenseP = os.path.join(figsP, 'varDense/')
-hetfP = os.path.join(figsP, 'hets/')
-sfsP = os.path.join(figsP, 'jsfs/')
-
-folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP]
-for folder in folderList:
-    if not os.path.exists(folder):
-        os.makedirs(folder)
-
-
-
-# load the data
-variants = zarr.open_group(zarrPath, mode='r')
-
-#NOTE: ids will already be read in common.smk, so no need to do this here (for now, we need to, though)
-ids = pd.read_table('samples109.txt', sep='\t', index_col=False)
-ids['id_nest'] = ids['id'] + '_' + ids['nest']
-ids = ids.sort_values(by='nest')
-
-
-nInds = ids.groupby(by= ['nest', 'pop']).count()['sample']
-#np.all(list(variants['samples']) == ids['id_nest'].values)
-
-samples = list(variants['samples'])
-subsIndex = [samples.index(s) for s in ids['id_nest']]
-ids['subsIndex'] = subsIndex
-ids.sort_values(by=['subsIndex'], inplace= True)
-##
-gtvars = al.GenotypeArray(variants['calldata/GT'])
-
-# define the groups (nests & pops)
-pops = {
-    'all': list(range(len(ids))),
-    'A': ids[ids['pop'] == 'A'].index.tolist(),
-    'N': ids[ids['pop'] == 'N'].index.tolist(),
-    'S': ids[ids['pop'] == 'S'].index.tolist(),
-}
-
-nests = {
-    'all': list(range(len(ids))),
-    'A2': ids[ids['nest'] == 'A2'].index.tolist(),
-    'A5': ids[ids['nest'] == 'A5'].index.tolist(),
-    'A6': ids[ids['nest'] == 'A6'].index.tolist(),
-    'N1': ids[ids['nest'] == 'N1'].index.tolist(),
-    'N4': ids[ids['nest'] == 'N4'].index.tolist(),
-    'N6': ids[ids['nest'] == 'N6'].index.tolist(),
-    'S1': ids[ids['nest'] == 'S1'].index.tolist(),
-    'S2': ids[ids['nest'] == 'S2'].index.tolist(),
-    'S5': ids[ids['nest'] == 'S5'].index.tolist()
-}
-
-
-
-
-
-### pops stats
-
-ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
-segAll_vars = ac_pops_vars['all'].is_segregating()[:]
-gtseg_vars = gtvars.compress(segAll_vars, axis=0)
-nAltVars = gtseg_vars.to_n_alt()
-
-gtseg_is_het = pd.DataFrame(gtseg_vars.is_het()).describe().transpose()
-gtseg_is_het.index = ids['id_nest']
-gtseg_is_het['het'] = gtseg_is_het['freq']/gtseg_is_het['count']
-gtseg_is_het['hom'] = 1-gtseg_is_het['het']
-gtseg_is_het.to_csv(os.path.join(statsP, 'nSegHets.txt'), header=True, index=True, sep= '\t')
-
-
-
-ac_nests_vars = gtvars.count_alleles_subpops(nests, max_allele=1)
-
-# nSeg per pop/nest as DataFrame:
-popseg = dict()
-for pop in ac_pops_vars.keys():
-    popseg[pop] = ac_pops_vars[pop].count_segregating()
-pd.Series(popseg, index=popseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.pop.txt'), header= False, index=True, sep= '\t')
-
-
-nestseg = dict()
-for nest in ac_nests_vars.keys():
-    nestseg[nest] = ac_nests_vars[nest].count_segregating()
-pd.Series(nestseg, index=nestseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.nest.txt'), header= False, index=True, sep= '\t')
-
-
-
-
-#############   pairwise distance matrix   #############
-
-dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
-
-
-# heatmap with dendrogram
-
-condensedDvar = scipy.spatial.distance.squareform(dvar)
-
-n2col = dict(zip(ids['nest'].unique(), sns.color_palette()))
-rowCols = np.array(ids['nest'].map(n2col))
-
-cDdf = pd.DataFrame(condensedDvar, index= ids['nest'], columns=ids['id'])
-g = sns.clustermap(cDdf, row_colors= rowCols, cmap= 'jet')
-g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xmajorticklabels(), fontsize = 12)     #ha= 'right', rotation= 40
-g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize = 12)
-
-g.savefig(os.path.join(figsP, 'pwDist.pdf'), bbox_inches='tight')
-
-# ---------------------------------------------------------------------
-
-#############   PCA   #############
 
 def plot_ld(gn, title, filename):
     m = al.rogers_huff_r(gn) ** 2
@@ -163,28 +41,6 @@ def plot_ld(gn, title, filename):
     ax.set_title(title)
     ax.figure.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
-
-
-plot_ld(nAltVars[:1000], 'Pairwise LD after random downsampling', 'ld_1000.pdf')
-
-
-
-# random subsampling of loci
-n = 100000  # number of SNPs to choose randomly
-vidxVars = np.random.choice(nAltVars.shape[0], n, replace=False)
-vidxVars.sort()
-
-gnrVars = nAltVars.take(vidxVars, axis=0)
-
-plot_ld(gnrVars[:1000], 'Pairwise LD after random downsampling.', 'ld_100k_rand.pdf')
-
-
-segScafs = variants['variants/CHROM'][:][segAll_vars]
-segBP = variants['variants/POS'][:][segAll_vars]
-segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
-
-
-# LD pruning
 def ld_prune(gn, varInf, size, step, threshold=.1, n_iter=1):
     for i in range(n_iter):
         loc_unlinked = al.locate_unlinked(gn, size=size, step=step, threshold=threshold)
@@ -195,45 +51,13 @@ def ld_prune(gn, varInf, size, step, threshold=.1, n_iter=1):
         varInf = varInf[loc_unlinked]
     return (gn, varInf)
 
-
-
-gnuVars, vars_ldPrd = ld_prune(nAltVars, segVars, size=50, step=20, threshold=.1, n_iter=4)
-
-
-plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filename= 'ld_prune.pdf')
-
-
-#populations = ids['pops'].unique()
-pop_cols = {
-    'A': sns.color_palette()[0],
-    'N': sns.color_palette()[3],
-    'S': sns.color_palette()[6],
-}
-
-#nests = ids['nest'].unique()
-nest_cols = {
-        'A2': sns.color_palette()[0],
-        'A5': sns.color_palette()[1],
-        'A6': sns.color_palette()[2],
-        'N1': sns.color_palette()[3],
-        'N4': sns.color_palette()[4],
-        'N6': sns.color_palette()[5],
-        'S1': sns.color_palette()[6],
-        'S2': sns.color_palette()[7],
-        'S5': sns.color_palette()[8]
-}
-
-
-############
-
 def plot_pca_coords(coords, model, pc1, pc2, ax, pops, pcols):
     sns.despine(ax=ax, offset=5)
     x = coords[:, pc1]
     y = coords[:, pc2]
     for pop in pops.unique():
         flt = (pops.values == pop)
-        ax.plot(x[flt], y[flt], marker='o', linestyle=' ', color= pcols[pop],
-                label=pop, markersize=6, mec='k', mew=.5)
+        ax.plot(x[flt], y[flt], marker='o', linestyle=' ', color= pcols[pop], label=pop, markersize=6, mec='k', mew=.5)
     ax.set_xlabel('PC%s (%.1f%%)' % (pc1+1, model.explained_variance_ratio_[pc1]*100))
     ax.set_ylabel('PC%s (%.1f%%)' % (pc2+1, model.explained_variance_ratio_[pc2]*100))
 
@@ -251,59 +75,6 @@ def fig_pca(coords, model, title, pops, pcols, filename):
     fig.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
 
-# nests
-
-# PCA using SVD - LD-pruned data (59544 loci)
-coords1var, model1var = al.pca(gnuVars, n_components=10, scaler='patterson')
-
-
-fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune.pdf')
-
-
-######
-# pca without LD pruning (random subset of 100000 loci)
-coords2var, model2var = al.pca(gnrVars, n_components=10, scaler='patterson')
-
-# pops
-#fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['pops'], pcols= pop_cols)
-
-# nests
-fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_100k_rand.pdf')
-
-
-# now for the full set (gtseg_vars)
-coords2allVars, model2allVars = al.pca(nAltVars, n_components=10, scaler='patterson')
-
-
-# pops
-#fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning all variants', pops = ids['pops'], pcols= pop_cols)
-
-# nests
-fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning', pops= ids['nest'], pcols= nest_cols, filename= 'pca_all.pdf')
-
-
-# pca with LD pruning, without Patterson's scaling
-coords3vars, model3vars = al.pca(gnuVars, n_components=10, scaler=None)
-
-
-# pops
-#fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling', pops = ids['pops'], pcols= pop_cols)
-
-# nests
-fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling.', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_noPatterson.pdf')
-
-
-# randomized PCA with LD pruning
-coords5vars, model5vars = al.randomized_pca(gnuVars, n_components=10, scaler='patterson')
-
-
-# pops
-#fig_pca(coords5vars, model5vars, 'Randomized PCA', pops= ids['pops'], pcols= pop_cols)
-
-# nests
-fig_pca(coords5vars, model5vars, 'Randomized PCA LD-pruned variants', pops= ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_rand.pdf')
-
-
 def plotHeatPCs(coords, ids, filename, PCs=4):
     df = pd.DataFrame(coords[:,0:PCs].T, columns=ids, index= range(1,PCs+1))
     plt.subplots(figsize= (20,5))
@@ -315,48 +86,14 @@ def plotHeatPCs(coords, ids, filename, PCs=4):
     plt.savefig(os.path.join(pcafP, filename), bbox_inches='tight')
 
 
-plotHeatPCs(coords1var, ids['nest'], PCs=5, filename= 'pca_LDprune_Heat.pdf')
-plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filename= 'pca_all_Heat.pdf')
-
-## get the Eigen values for PCAs
-
-# for all (segreg.) vars (n = 1,319,775)
-segScafs = variants['variants/CHROM'][:][segAll_vars]
-segBP = variants['variants/POS'][:][segAll_vars]
-segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
-## for gemma:
-segVars.to_csv(os.path.join(statsP, 'vars_Segregate.gemma.scafbp'), sep= ' ', index= False, header= False)
-
-
-
-# write first 4 eigen values to file:
-pd.DataFrame([ x[:4] for x in coords1var ]).to_csv(os.path.join(pcasP, "vars_LDprune.eigen"), sep= ' ', index= False, header= False)
-
-pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars_all.eigen"), sep= ' ', index= False, header= False)
-
-# write general shape info to file
-pd.Series([ gtvars.shape[0], gtseg_vars.shape[0], dvar.shape[0], gnuVars.shape[0] ], index= ['all', 'seg. alleles', 'pwDist shape', 'LD-pruned vars']).to_csv(os.path.join(statsP, "nVars.txt"), sep='\t', index= True, header= False)
-
-
-
-
-######################
-
-# plot variant density
-
-
 def plot_windowed_variant_density(pos, window_size, filename, title=None):
-
     # setup windows
     bins = np.arange(0, pos.max(), window_size)
-
     # use window midpoints as x coordinate
     x = (bins[1:] + bins[:-1])/2
-
     # compute variant density in each window
     h, _ = np.histogram(pos, bins=bins)
     y = h / window_size
-
     # plot
     fig, ax = plt.subplots(figsize=(12, 3))
     sns.despine(ax=ax, offset=10)
@@ -366,12 +103,6 @@ def plot_windowed_variant_density(pos, window_size, filename, title=None):
     if title:
         ax.set_title(title)
     fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
-
-pos = variants['variants/POS'][:]
-# probably have to subset individual scaffolds for this to have more meaning
-plot_windowed_variant_density(pos, window_size=100000, title='Raw variant density', filename= 'varDensity_window100k.pdf')
-
-
 
 def plot_variant_hist(f, filename, bins=30):
     x = variants[os.path.join('variants',f)][:]
@@ -383,11 +114,7 @@ def plot_variant_hist(f, filename, bins=30):
     ax.set_title('Variant %s distribution' % f)
     fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
 
-plot_variant_hist('DP', bins= 100, filename= 'var_DP_hist.pdf')
-plot_variant_hist('AF', filename= 'var_AF_hist.pdf')
 
-
-# plot joint frequency distribution of two variables
 def plot_variant_hist_2d(f1, f2, downsample, filename):
     x = variants[os.path.join('variants',f1)][:][::downsample]
     y = variants[os.path.join('variants',f2)][:][::downsample]
@@ -398,25 +125,6 @@ def plot_variant_hist_2d(f1, f2, downsample, filename):
     ax.set_ylabel(f2)
     ax.set_title('Variant %s versus %s joint distribution' % (f1, f2))
     fig.savefig(os.path.join(varDenseP, filename), bbox_inches='tight')
-
-plot_variant_hist_2d('MCOV', 'MQM', downsample=10, filename= 'varDensity_MCOV_MQM_hist2d.pdf')
-
-# Ti vs Tv
-
-#mutations = np.char.add(variants['variants/REF'], variants['variants/ALT'][:, 0])
-
-
-#######################
-
-## count the number (and proportion) of heterozygous calls
-
-#gtvars.count_het(axis=0)     # axis (0 = across loci, 1 = across samples)
-
-propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
-#missing = gtsub.count_missing(axis=0)[:] / len(gtvars)
-
-# plot the proportion of heterozygous genotypes
-
 
 def plotPropHets(propHets, ids, filename):
     plt.subplots(figsize= (20,5))
@@ -435,78 +143,6 @@ def plotPropHets(propHets, ids, filename):
     ax.set_xticklabels(ids['id_nest'].values, rotation= 40, ha= 'right', fontsize= 8)
     ax.figure.savefig(os.path.join(hetfP, filename), bbox_inches='tight')
 
-
-plotPropHets(propHets, ids, filename= 'propHets.pdf')
-
-
-
-#def plot_genotype_frequency_pops(pc, title):
-#    fig, ax = plt.subplots(figsize=(12, 4))
-#    sns.despine(ax=ax, offset=10)
-#    left = np.arange(len(pc))
-#    palette = sns.color_palette()
-#    pop2color = {'A': palette[0], 'N': palette[1], 'S': palette[2]}
-#    colors = [pop2color[p] for p in ids['pop'] ]
-#    ax.bar(left, pc, color=colors)
-#    ax.set_xlim(0, len(pc))
-#    ax.set_xlabel('Sample index')
-#    ax.set_ylabel('Percent calls')
-#    ax.set_title(title)
-#    handles = [mpl.patches.Patch(color=palette[0]),
-#               mpl.patches.Patch(color=palette[1]),
-#               mpl.patches.Patch(color=palette[2])]
-#    ax.legend(handles=handles, labels=list(np.unique(ids['pop'])), title='Population',
-#              bbox_to_anchor=(1, 1), loc='upper left')
-
-
-##plot_genotype_frequency(missing, 'Missing')
-#plot_genotype_frequency_pops(propHets, 'Heterozygous')
-
-
-#def plot_genotype_frequency_nests(pc, title):
-#    fig, ax = plt.subplots(figsize=(12, 4))
-#    sns.despine(ax=ax, offset=10)
-#    left = np.arange(len(pc))
-#    palette = sns.color_palette()
-#    # change here
-#    pop2color = dict(zip(np.unique(ids['nest']), palette))
-#    colors = [pop2color[p] for p in ids['nest'] ]
-#    ax.bar(left, pc, color=colors)
-#    ax.set_xlim(0, len(pc))
-#    ax.set_xlabel('Sample index')
-#    ax.set_ylabel('Percent calls')
-#    ax.set_title(title)
-#    handles = [mpl.patches.Patch(color=palette[0]),
-#               mpl.patches.Patch(color=palette[1]),
-#               mpl.patches.Patch(color=palette[2]),
-#               mpl.patches.Patch(color=palette[3]),
-#               mpl.patches.Patch(color=palette[4]),
-#               mpl.patches.Patch(color=palette[5]),
-#               mpl.patches.Patch(color=palette[6]),
-#               mpl.patches.Patch(color=palette[7]),
-#               mpl.patches.Patch(color=palette[8])]
-#    ax.legend(handles=handles, labels=list(np.unique(ids['nest'])), title='Nests',
-#              bbox_to_anchor=(1, 1), loc='upper left')
-#
-#
-#plot_genotype_frequency_nests(propHets, 'Heterozygous')
-
-
-
-
-
-gtseg_vars = gtvars.compress(segAll_vars, axis=0)
-
-
-############
-# ac_nests_vars
-#ac_seg = ac_subpops['all'].compress(segAll)
-#
-##########################
-
-# plot joint SFS for pops
-
-
 def plot_jsfs(ac, fname):
     tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
     combs = list(combinations(tmpDict, 2))
@@ -516,12 +152,7 @@ def plot_jsfs(ac, fname):
         al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
         ax.set_ylabel(' '.join(['Alternate allele count,', popPair[0] ]))
         ax.set_xlabel(' '.join(['Alternate allele count,', popPair[1] ]))
-        fig.savefig(os.path.join(sfsP, '.'.join([fname, popPair[0], popPair[1], 'pdf' ])), bbox_inches='tight')
-
-plot_jsfs(ac_pops_vars, fname= 'jsfs')
-
-
-
+        fig.savefig(os.path.join(sfsP, '.'.join([fname, popPair[0], popPair[1], 'png' ])), bbox_inches='tight')
 
 def plot_jsfs_nests(ac, fname):
     tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
@@ -534,65 +165,441 @@ def plot_jsfs_nests(ac, fname):
             al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
             ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
             ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
-            fig.savefig(os.path.join(sfsP, '.'.join([fname, nestPair[0], nestPair[1], 'pdf' ])), bbox_inches='tight')
-
-
-plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
-
-# combine plots for each pop in one figure (we'll deal with this, once we've decided what will be used...
-
-#def plot_jsfs_nests(ac, fname):
-#    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
-#    for pop in ['A', 'N', 'S']:
-#        popDict = { k: v for k, v in tmpDict.items() if pop in k }
-#        nestCombs = list(combinations(popDict, 2))
-#        fig = plt.figure(figsize=(15, 5))
-#
-#        for i, nestPair in enumerate(nestCombs):
-#            print(i, nestPair)
-#            ax = fig.add_subplot(1,3,i+1)
-#            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
-#            #fig, ax = plt.subplots(figsize=(6,6))
-#            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
-#            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
-#            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
-#            ax.cla()
-#        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'pdf' ])), bbox_inches='tight')
-#        ##p.remove()
-#
-#
-#plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
-
-
-# sample code for the above (from https://stackoverflow.com/questions/19053077/looping-over-data-and-creating-individual-figures#19053157 )
-
-#fig = plt.figure()
-#ax = fig.addsubplot(111)
-#
-## Tinker with labels and spines
-#ax.set_xlabel(...)
-#ax.set_ylabel(...)
-#[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
-#...
-#
-## Plot data and save figures
-#for mol in mols:
-#    for energy, density in data:
-#        ax.cla() # or ax.clear()
-#        p, = ax.plot(density, energy, 'ro')
-#
-#        fig.savefig(mol+".png")
-#        p.remove() # rem
+            fig.savefig(os.path.join(sfsP, '.'.join([fname, nestPair[0], nestPair[1], 'png' ])), bbox_inches='tight')
 
 
 
-################
 
-# Fst
 
-# estimate variance components from gt data
-a, b, c, = al.weir_cockerham_fst(gtseg, list(subpops.values())[1:])
 
-# estimate theta (a.k.a. Fst) for each variant & allele directly:
-fst = a / (a + b + c)
+
+# --------------------------------------------
+
+if __name__ == "__main__":
+
+
+
+    zarrPath = sys.argv[1]
+
+
+    zarrname = zarrPath.strip('.zarr/')
+    # create folders
+
+    statsP = os.path.join(zarrname, 'stats/al/')
+    figsP = os.path.join(zarrname, 'figs/al/')
+    pcafP = os.path.join(figsP, 'pca/')      # pca figs
+    pcasP = os.path.join(statsP, 'pca/')     # pca stats
+    varDenseP = os.path.join(figsP, 'varDense/')
+    hetfP = os.path.join(figsP, 'hets/')
+    sfsP = os.path.join(figsP, 'jsfs/')
+
+    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP]
+    for folder in folderList:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+
+
+    # load the data
+    variants = zarr.open_group(zarrPath, mode='r')
+
+    #NOTE: ids will already be read in common.smk, so no need to do this here (for now, we need to, though)
+    ids = pd.read_table('samples109.txt', sep='\t', index_col=False)
+    ids['id_nest'] = ids['id'] + '_' + ids['nest']
+    ids = ids.sort_values(by='nest')
+
+
+    nInds = ids.groupby(by= ['nest', 'pop']).count()['sample']
+    #np.all(list(variants['samples']) == ids['id_nest'].values)
+
+    samples = list(variants['samples'])
+    subsIndex = [samples.index(s) for s in ids['id_nest']]
+    ids['subsIndex'] = subsIndex
+    ids.sort_values(by=['subsIndex'], inplace= True)
+    ##
+    gtvars = al.GenotypeArray(variants['calldata/GT'])
+
+    # define the groups (nests & pops)
+    pops = {
+        'all': list(range(len(ids))),
+        'A': ids[ids['pop'] == 'A'].index.tolist(),
+        'N': ids[ids['pop'] == 'N'].index.tolist(),
+        'S': ids[ids['pop'] == 'S'].index.tolist(),
+    }
+
+    nests = {
+        'all': list(range(len(ids))),
+        'A2': ids[ids['nest'] == 'A2'].index.tolist(),
+        'A5': ids[ids['nest'] == 'A5'].index.tolist(),
+        'A6': ids[ids['nest'] == 'A6'].index.tolist(),
+        'N1': ids[ids['nest'] == 'N1'].index.tolist(),
+        'N4': ids[ids['nest'] == 'N4'].index.tolist(),
+        'N6': ids[ids['nest'] == 'N6'].index.tolist(),
+        'S1': ids[ids['nest'] == 'S1'].index.tolist(),
+        'S2': ids[ids['nest'] == 'S2'].index.tolist(),
+        'S5': ids[ids['nest'] == 'S5'].index.tolist()
+    }
+
+
+
+
+
+    ### pops stats
+
+    ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
+    segAll_vars = ac_pops_vars['all'].is_segregating()[:]
+    gtseg_vars = gtvars.compress(segAll_vars, axis=0)
+    nAltVars = gtseg_vars.to_n_alt()
+
+    gtseg_is_het = pd.DataFrame(gtseg_vars.is_het()).describe().transpose()
+    gtseg_is_het.index = ids['id_nest']
+    gtseg_is_het['het'] = gtseg_is_het['freq']/gtseg_is_het['count']
+    gtseg_is_het['hom'] = 1-gtseg_is_het['het']
+    gtseg_is_het.to_csv(os.path.join(statsP, 'nSegHets.txt'), header=True, index=True, sep= '\t')
+
+
+
+    ac_nests_vars = gtvars.count_alleles_subpops(nests, max_allele=1)
+
+    # nSeg per pop/nest as DataFrame:
+    popseg = dict()
+    for pop in ac_pops_vars.keys():
+        popseg[pop] = ac_pops_vars[pop].count_segregating()
+    pd.Series(popseg, index=popseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.pop.txt'), header= False, index=True, sep= '\t')
+
+
+    nestseg = dict()
+    for nest in ac_nests_vars.keys():
+        nestseg[nest] = ac_nests_vars[nest].count_segregating()
+    pd.Series(nestseg, index=nestseg.keys()).to_csv(os.path.join(statsP, 'nSegAlleles.nest.txt'), header= False, index=True, sep= '\t')
+
+
+
+
+    #############   pairwise distance matrix   #############
+
+    dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
+
+
+    # heatmap with dendrogram
+
+    condensedDvar = scipy.spatial.distance.squareform(dvar)
+
+    n2col = dict(zip(ids['nest'].unique(), sns.color_palette()))
+    rowCols = np.array(ids['nest'].map(n2col))
+
+    cDdf = pd.DataFrame(condensedDvar, index= ids['nest'], columns=ids['id'])
+    g = sns.clustermap(cDdf, row_colors= rowCols, cmap= 'jet')
+    g.ax_heatmap.set_xticklabels(g.ax_heatmap.get_xmajorticklabels(), fontsize = 12)     #ha= 'right', rotation= 40
+    g.ax_heatmap.set_yticklabels(g.ax_heatmap.get_ymajorticklabels(), fontsize = 12)
+
+    g.savefig(os.path.join(figsP, 'pwDist.png'), bbox_inches='tight')
+
+    # ---------------------------------------------------------------------
+
+    #############   PCA   #############
+
+
+
+    plot_ld(nAltVars[:1000], 'Pairwise LD after random downsampling', 'ld_1000.png')
+
+
+
+    # random subsampling of loci
+    n = 100000  # number of SNPs to choose randomly
+    vidxVars = np.random.choice(nAltVars.shape[0], n, replace=False)
+    vidxVars.sort()
+
+    gnrVars = nAltVars.take(vidxVars, axis=0)
+
+    plot_ld(gnrVars[:1000], 'Pairwise LD after random downsampling.', 'ld_100k_rand.png')
+
+
+    segScafs = variants['variants/CHROM'][:][segAll_vars]
+    segBP = variants['variants/POS'][:][segAll_vars]
+    segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
+
+
+    # LD pruning
+
+
+    gnuVars, vars_ldPrd = ld_prune(nAltVars, segVars, size=50, step=20, threshold=.1, n_iter=4)
+
+
+    plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filename= 'ld_prune.png')
+
+
+    #populations = ids['pops'].unique()
+    pop_cols = {
+        'A': sns.color_palette()[0],
+        'N': sns.color_palette()[3],
+        'S': sns.color_palette()[6],
+    }
+
+    #nests = ids['nest'].unique()
+    nest_cols = {
+            'A2': sns.color_palette()[0],
+            'A5': sns.color_palette()[1],
+            'A6': sns.color_palette()[2],
+            'N1': sns.color_palette()[3],
+            'N4': sns.color_palette()[4],
+            'N6': sns.color_palette()[5],
+            'S1': sns.color_palette()[6],
+            'S2': sns.color_palette()[7],
+            'S5': sns.color_palette()[8]
+    }
+
+
+    ############
+
+        # nests
+
+    # PCA using SVD - LD-pruned data (59544 loci)
+    coords1var, model1var = al.pca(gnuVars, n_components=10, scaler='patterson')
+
+
+    fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune.png')
+
+
+    ######
+    # pca without LD pruning (random subset of 100000 loci)
+    coords2var, model2var = al.pca(gnrVars, n_components=10, scaler='patterson')
+
+    # pops
+    #fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['pops'], pcols= pop_cols)
+
+    # nests
+    fig_pca(coords2var, model2var, 'Conventional PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_100k_rand.png')
+
+
+    # now for the full set (gtseg_vars)
+    coords2allVars, model2allVars = al.pca(nAltVars, n_components=10, scaler='patterson')
+
+
+    # pops
+    #fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning all variants', pops = ids['pops'], pcols= pop_cols)
+
+    # nests
+    fig_pca(coords2allVars, model2allVars, 'Conventional PCA without LD pruning', pops= ids['nest'], pcols= nest_cols, filename= 'pca_all.png')
+
+
+    # pca with LD pruning, without Patterson's scaling
+    coords3vars, model3vars = al.pca(gnuVars, n_components=10, scaler=None)
+
+
+    # pops
+    #fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling', pops = ids['pops'], pcols= pop_cols)
+
+    # nests
+    fig_pca(coords3vars, model3vars, 'Conventional PCA LD-pruned variants without variance scaling.', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_noPatterson.png')
+
+
+    # randomized PCA with LD pruning
+    coords5vars, model5vars = al.randomized_pca(gnuVars, n_components=10, scaler='patterson')
+
+
+    # pops
+    #fig_pca(coords5vars, model5vars, 'Randomized PCA', pops= ids['pops'], pcols= pop_cols)
+
+    # nests
+    fig_pca(coords5vars, model5vars, 'Randomized PCA LD-pruned variants', pops= ids['nest'], pcols= nest_cols, filename= 'pca_LDprune_rand.png')
+
+
+    plotHeatPCs(coords1var, ids['nest'], PCs=5, filename= 'pca_LDprune_Heat.png')
+    plotHeatPCs(coords2allVars, ids['nest'], PCs=5, filename= 'pca_all_Heat.png')
+
+    ## get the Eigen values for PCAs
+
+    # for all (segreg.) vars (n = 1,319,775)
+    segScafs = variants['variants/CHROM'][:][segAll_vars]
+    segBP = variants['variants/POS'][:][segAll_vars]
+    segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
+    ## for gemma:
+    segVars.to_csv(os.path.join(statsP, 'vars_Segregate.gemma.scafbp'), sep= ' ', index= False, header= False)
+
+
+
+    # write first 4 eigen values to file:
+    pd.DataFrame([ x[:4] for x in coords1var ]).to_csv(os.path.join(pcasP, "vars_LDprune.eigen"), sep= ' ', index= False, header= False)
+
+    pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars_all.eigen"), sep= ' ', index= False, header= False)
+
+    # write general shape info to file
+    pd.Series([ gtvars.shape[0], gtseg_vars.shape[0], dvar.shape[0], gnuVars.shape[0] ], index= ['all', 'seg. alleles', 'pwDist shape', 'LD-pruned vars']).to_csv(os.path.join(statsP, "nVars.txt"), sep='\t', index= True, header= False)
+
+
+
+
+    ######################
+
+    # plot variant density
+
+
+
+    pos = variants['variants/POS'][:]
+    # probably have to subset individual scaffolds for this to have more meaning
+    plot_windowed_variant_density(pos, window_size=100000, title='Raw variant density', filename= 'varDensity_window100k.png')
+
+
+
+    plot_variant_hist('DP', bins= 100, filename= 'var_DP_hist.png')
+    plot_variant_hist('AF', filename= 'var_AF_hist.png')
+
+
+    # plot joint frequency distribution of two variables
+    plot_variant_hist_2d('MCOV', 'MQM', downsample=10, filename= 'varDensity_MCOV_MQM_hist2d.png')
+
+    # Ti vs Tv
+
+    #mutations = np.char.add(variants['variants/REF'], variants['variants/ALT'][:, 0])
+
+
+    #######################
+
+    ## count the number (and proportion) of heterozygous calls
+
+    #gtvars.count_het(axis=0)     # axis (0 = across loci, 1 = across samples)
+
+    propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
+    #missing = gtsub.count_missing(axis=0)[:] / len(gtvars)
+
+    # plot the proportion of heterozygous genotypes
+
+
+
+    plotPropHets(propHets, ids, filename= 'propHets.png')
+
+
+
+    #def plot_genotype_frequency_pops(pc, title):
+    #    fig, ax = plt.subplots(figsize=(12, 4))
+    #    sns.despine(ax=ax, offset=10)
+    #    left = np.arange(len(pc))
+    #    palette = sns.color_palette()
+    #    pop2color = {'A': palette[0], 'N': palette[1], 'S': palette[2]}
+    #    colors = [pop2color[p] for p in ids['pop'] ]
+    #    ax.bar(left, pc, color=colors)
+    #    ax.set_xlim(0, len(pc))
+    #    ax.set_xlabel('Sample index')
+    #    ax.set_ylabel('Percent calls')
+    #    ax.set_title(title)
+    #    handles = [mpl.patches.Patch(color=palette[0]),
+    #               mpl.patches.Patch(color=palette[1]),
+    #               mpl.patches.Patch(color=palette[2])]
+    #    ax.legend(handles=handles, labels=list(np.unique(ids['pop'])), title='Population',
+    #              bbox_to_anchor=(1, 1), loc='upper left')
+
+
+    ##plot_genotype_frequency(missing, 'Missing')
+    #plot_genotype_frequency_pops(propHets, 'Heterozygous')
+
+
+    #def plot_genotype_frequency_nests(pc, title):
+    #    fig, ax = plt.subplots(figsize=(12, 4))
+    #    sns.despine(ax=ax, offset=10)
+    #    left = np.arange(len(pc))
+    #    palette = sns.color_palette()
+    #    # change here
+    #    pop2color = dict(zip(np.unique(ids['nest']), palette))
+    #    colors = [pop2color[p] for p in ids['nest'] ]
+    #    ax.bar(left, pc, color=colors)
+    #    ax.set_xlim(0, len(pc))
+    #    ax.set_xlabel('Sample index')
+    #    ax.set_ylabel('Percent calls')
+    #    ax.set_title(title)
+    #    handles = [mpl.patches.Patch(color=palette[0]),
+    #               mpl.patches.Patch(color=palette[1]),
+    #               mpl.patches.Patch(color=palette[2]),
+    #               mpl.patches.Patch(color=palette[3]),
+    #               mpl.patches.Patch(color=palette[4]),
+    #               mpl.patches.Patch(color=palette[5]),
+    #               mpl.patches.Patch(color=palette[6]),
+    #               mpl.patches.Patch(color=palette[7]),
+    #               mpl.patches.Patch(color=palette[8])]
+    #    ax.legend(handles=handles, labels=list(np.unique(ids['nest'])), title='Nests',
+    #              bbox_to_anchor=(1, 1), loc='upper left')
+    #
+    #
+    #plot_genotype_frequency_nests(propHets, 'Heterozygous')
+
+
+
+
+
+    gtseg_vars = gtvars.compress(segAll_vars, axis=0)
+
+
+    ############
+    # ac_nests_vars
+    #ac_seg = ac_subpops['all'].compress(segAll)
+    #
+    ##########################
+
+    # plot joint SFS for pops
+
+
+    plot_jsfs(ac_pops_vars, fname= 'jsfs')
+
+
+
+
+
+    plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
+
+    # combine plots for each pop in one figure (we'll deal with this, once we've decided what will be used...
+
+    #def plot_jsfs_nests(ac, fname):
+    #    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    #    for pop in ['A', 'N', 'S']:
+    #        popDict = { k: v for k, v in tmpDict.items() if pop in k }
+    #        nestCombs = list(combinations(popDict, 2))
+    #        fig = plt.figure(figsize=(15, 5))
+    #
+    #        for i, nestPair in enumerate(nestCombs):
+    #            print(i, nestPair)
+    #            ax = fig.add_subplot(1,3,i+1)
+    #            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
+    #            #fig, ax = plt.subplots(figsize=(6,6))
+    #            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
+    #            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
+    #            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
+    #            ax.cla()
+    #        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'png' ])), bbox_inches='tight')
+    #        ##p.remove()
+    #
+    #
+    #plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
+
+
+    # sample code for the above (from https://stackoverflow.com/questions/19053077/looping-over-data-and-creating-individual-figures#19053157 )
+
+    #fig = plt.figure()
+    #ax = fig.addsubplot(111)
+    #
+    ## Tinker with labels and spines
+    #ax.set_xlabel(...)
+    #ax.set_ylabel(...)
+    #[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
+    #...
+    #
+    ## Plot data and save figures
+    #for mol in mols:
+    #    for energy, density in data:
+    #        ax.cla() # or ax.clear()
+    #        p, = ax.plot(density, energy, 'ro')
+    #
+    #        fig.savefig(mol+".png")
+    #        p.remove() # rem
+
+
+
+    ################
+
+    # Fst
+
+    # estimate variance components from gt data
+    #a, b, c, = al.weir_cockerham_fst(gtseg, list(subpops.values())[1:])
+
+    # estimate theta (a.k.a. Fst) for each variant & allele directly:
+    #fst = a / (a + b + c)
 
