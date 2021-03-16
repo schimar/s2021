@@ -168,6 +168,41 @@ def plot_jsfs_nests(ac, fname):
             fig.savefig(os.path.join(sfsP, '.'.join([fname, nestPair[0], nestPair[1], 'png' ])), bbox_inches='tight')
 
 
+# -------------------------------------------------------- #
+# W & C's fst with block-jackknife standard errors
+def calcWCfst_bj_knife(ac, pairs, gtvars, idx1, idx2, blen):
+    acu = al.AlleleCountsArray(ac[pairs[0]][:] + ac[pairs[1]][:])
+    flt = acu.is_segregating() & (acu.max_allele() == 1)
+    gtmp = gtvars.compress(flt, axis=0)
+    # Weir & Cockerham's
+    fst, se, vb, _ = al.stats.fst.blockwise_weir_cockerham_fst(gtseg_vars, subpops=[idx1, idx2], blen=blen, max_allele=1)
+    #segVarsTmp = (pairs, np.count_nonzero(flt))
+    return fst, se, vb, pairs, np.count_nonzero(flt)
+
+#calcWCfst_bj_knife(ac_nests_vars, ('A2', 'S1'), gtvars, nests['A2'], nests['S1'], blen=10000)
+#calcWCfst_bj_knife(ac_pops_vars, ('A', 'S'), gtvars, pops['A'], pops['S'], blen=10000)
+
+def fst_bj_knife_pair(ac, gtvars, poplvl, fname, blen=10000, subsample= False):
+    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    combs = list(combinations(tmpDict, 2))
+    res = list()
+    for pair in combs:
+        if subsample:
+            minlen = min(len(poplvl[pair[0]]), len(poplvl[pair[1]]))
+            idx1 = random.sample(poplvl[pair[0]], minlen)
+            idx2 = random.sample(poplvl[pair[1]], minlen)
+        else:
+            idx1 = poplvl[pair[0]]
+            idx2 = poplvl[pair[1]]
+        wc, se, vb, pairs, nSegVars = calcWCfst_bj_knife(ac, pair, gtvars, idx1, idx2, blen)
+        res.append((pairs[0], len(idx1), pairs[1], len(idx2), nSegVars, wc, se))
+    if subsample:
+        pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
+    else:
+        pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
+    ## name them according to pop or nest
+    ## make figures with barplots? (Fst <0 to 0?)
+    ## return DataFrame and write to file in the call to func??? (probably better, so you can see the path&filename in the call...)
 
 
 
@@ -192,8 +227,11 @@ if __name__ == "__main__":
     varDenseP = os.path.join(figsP, 'varDense/')
     hetfP = os.path.join(figsP, 'hets/')
     sfsP = os.path.join(figsP, 'jsfs/')
+    fstsP = os.path.join(zarrname, 'stats/al/fst/')
+    fstfP = os.path.join(zarrname, 'figs/al/fst/')
 
-    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP]
+
+    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsP, fstfP]
     for folder in folderList:
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -277,7 +315,7 @@ if __name__ == "__main__":
 
 
     #############   pairwise distance matrix   #############
-
+    print("Calculating pairwise distance matrix")
     dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
 
 
@@ -299,7 +337,7 @@ if __name__ == "__main__":
 
     #############   PCA   #############
 
-
+    print("Calculating PCAs and plotting figures")
 
     plot_ld(nAltVars[:1000], 'Pairwise LD after random downsampling', 'ld_1000.png')
 
@@ -434,7 +472,7 @@ if __name__ == "__main__":
 
     # plot variant density
 
-
+    print("Plotting variant density and joint site frequency spectra")
 
     pos = variants['variants/POS'][:]
     # probably have to subset individual scaffolds for this to have more meaning
@@ -593,13 +631,15 @@ if __name__ == "__main__":
 
 
 
-    ################
+    # -------------------------------------------------------- #
 
     # Fst
 
-    # estimate variance components from gt data
-    #a, b, c, = al.weir_cockerham_fst(gtseg, list(subpops.values())[1:])
+    print("Calculating Weir & Cockerham's Fst with std.err from block-jackknife")
 
-    # estimate theta (a.k.a. Fst) for each variant & allele directly:
-    #fst = a / (a + b + c)
+    fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, fname= 'nests', blen= 10000, subsample=True)
+    fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, fname= 'pops', blen= 10000, subsample=True)
+
+
+
 
