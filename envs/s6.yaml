@@ -22,3 +22,5 @@ dependencies:
   - zarr=2.6.1
   - numexpr=2.7.2
   - varname>=0.6.3
+  - gemma=0.98.3
+  - vcftools=0.1.16
