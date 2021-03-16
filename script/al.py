@@ -282,7 +282,7 @@ if __name__ == "__main__":
 
 
 
-    ### pops stats
+    ### allele counts, segregating alleles (for all inds) and heterozygosity
 
     ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
     segAll_vars = ac_pops_vars['all'].is_segregating()[:]
@@ -316,6 +316,7 @@ if __name__ == "__main__":
 
     #############   pairwise distance matrix   #############
     print("-----------  Calculating pairwise distance matrix  -----------")
+
     dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
 
 
@@ -564,7 +565,6 @@ if __name__ == "__main__":
 
 
 
-    gtseg_vars = gtvars.compress(segAll_vars, axis=0)
 
 
     ############
