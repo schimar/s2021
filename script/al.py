@@ -200,9 +200,9 @@ def fst_bj_knife_pair(ac, gtvars, poplvl, fname, blen=10000, subsample= False):
         pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
     else:
         pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
-    ## name them according to pop or nest (with varname.nameof - but no conda package...)
+    #### name them according to pop or nest (with varname.nameof - but no conda package...)
     ## make figures with barplots? (Fst <0 to 0?)
-    ## return DataFrame and write to file in the call to func??? (probably better, so you can see the path&filename in the call...)
+    ## return DataFrame and write to file in the call to func??? (probably better, so you can see the path&filename in the call and you can write another func to plot with the df...)
 
 
 
