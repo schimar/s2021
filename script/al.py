@@ -46,7 +46,7 @@ def ld_prune(gn, varInf, size, step, threshold=.1, n_iter=1):
         loc_unlinked = al.locate_unlinked(gn, size=size, step=step, threshold=threshold)
         n = np.count_nonzero(loc_unlinked)
         n_remove = gn.shape[0] - n
-        print('iteration', i+1, 'retaining', n, 'removing', n_remove, 'variants')
+        print('LD pruning: iteration', i+1, 'retaining', n, 'removing', n_remove, 'variants')
         gn = gn.compress(loc_unlinked, axis=0)
         varInf = varInf[loc_unlinked]
     return (gn, varInf)
@@ -315,7 +315,7 @@ if __name__ == "__main__":
 
 
     #############   pairwise distance matrix   #############
-    print("Calculating pairwise distance matrix")
+    print("-----------  Calculating pairwise distance matrix  -----------")
     dvar = al.pairwise_distance(gtvars.to_n_alt(), metric= 'cityblock')
 
 
@@ -337,7 +337,7 @@ if __name__ == "__main__":
 
     #############   PCA   #############
 
-    print("Calculating PCAs and plotting figures")
+    print("-----------  LD pruning, calculating PCAs and plotting figures  -----------")
 
     plot_ld(nAltVars[:1000], 'Pairwise LD after random downsampling', 'ld_1000.png')
 
@@ -472,7 +472,7 @@ if __name__ == "__main__":
 
     # plot variant density
 
-    print("Plotting variant density and joint site frequency spectra")
+    print("--------  Plotting variant density and joint site frequency spectra  --------")
 
     pos = variants['variants/POS'][:]
     # probably have to subset individual scaffolds for this to have more meaning
@@ -635,7 +635,7 @@ if __name__ == "__main__":
 
     # Fst
 
-    print("Calculating Weir & Cockerham's Fst with std.err from block-jackknife")
+    print("---  Calculating Weir & Cockerham's Fst with std.err from block-jackknife  ---")
 
     fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, fname= 'nests', blen= 10000, subsample=True)
     fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, fname= 'pops', blen= 10000, subsample=True)
