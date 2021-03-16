@@ -21,3 +21,4 @@ dependencies:
   - matplotlib=3.3.4
   - zarr=2.6.1
   - numexpr=2.7.2
+  - varname>=0.6.3

@@ -14,6 +14,7 @@ import numpy as np
 np.random.seed(42)
 import pandas as pd
 import zarr
+from varname import nameof
 #import scipy.parse
 import scipy.spatial
 #%matplotlib
