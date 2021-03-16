@@ -23,3 +23,4 @@ dependencies:
   - numexpr=2.7.2
   - gemma=0.98.3
   - vcftools=0.1.16
+  - qctool=2.0.7
