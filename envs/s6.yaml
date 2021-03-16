@@ -23,4 +23,7 @@ dependencies:
   - numexpr=2.7.2
   - gemma=0.98.3
   - vcftools=0.1.16
-  - qctool=2.0.7
+  - pip=20.1.1
+  - pip:
+    - qctool==2.0.7
+    - varname==0.6.3
