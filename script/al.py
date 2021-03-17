@@ -176,7 +176,6 @@ def calcWCfst_bj_knife(ac, pairs, gtvars, idx1, idx2, blen):
     gtmp = gtvars.compress(flt, axis=0)
     # Weir & Cockerham's
     fst, se, vb, _ = al.stats.fst.blockwise_weir_cockerham_fst(gtseg_vars, subpops=[idx1, idx2], blen=blen, max_allele=1)
-    #segVarsTmp = (pairs, np.count_nonzero(flt))
     return fst, se, vb, pairs, np.count_nonzero(flt)
 
 #calcWCfst_bj_knife(ac_nests_vars, ('A2', 'S1'), gtvars, nests['A2'], nests['S1'], blen=10000)
@@ -196,13 +195,22 @@ def fst_bj_knife_pair(ac, gtvars, poplvl, fname, blen=10000, subsample= False):
             idx2 = poplvl[pair[1]]
         wc, se, vb, pairs, nSegVars = calcWCfst_bj_knife(ac, pair, gtvars, idx1, idx2, blen)
         res.append((pairs[0], len(idx1), pairs[1], len(idx2), nSegVars, wc, se))
-    if subsample:
-        pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
-    else:
-        pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
+    #if subsample:
+    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')) #.to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
+    #else:
+    #    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
     #### name them according to pop or nest (with varname.nameof - but no conda package...)
     ## make figures with barplots? (Fst <0 to 0?)
-    ## return DataFrame and write to file in the call to func??? (probably better, so you can see the path&filename in the call and you can write another func to plot with the df...)
+
+
+def plot_bjFst(df, fname):
+    fig, ax = plt.subplots(figsize=(15,5))
+    plt.errorbar(np.arange(1,df.shape[0]+1), df['bjknife.wcFst'], yerr=df['std.err.wcFst'], fmt='o', color='Black', elinewidth=2, capthick=1, errorevery=1, alpha=1, ms=4, capsize=5)
+    plt.bar(np.arange(1,df.shape[0]+1), df['bjknife.wcFst'], tick_label=np.arange(1,df.shape[0]+1))
+    plt.xlabel('pairs')
+    plt.ylabel("$F_{ST}$")
+    ax.set_xticklabels(df['pair1'] + ' - ' + df['pair2'], rotation= 40, ha= 'right', fontsize= 8)
+    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'bjFst_bar.pdf'])), bbox_inches='tight')
 
 
 
@@ -637,9 +645,20 @@ if __name__ == "__main__":
 
     print("---  Calculating Weir & Cockerham's Fst with std.err from block-jackknife  ---")
 
-    fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, fname= 'nests', blen= 10000, subsample=True)
-    fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, fname= 'pops', blen= 10000, subsample=True)
+    bjFst_nests = fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, fname= 'nests', blen= 10000, subsample=True)
+    bjFst_pops = fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, fname= 'pops', blen= 10000, subsample=True)
+
+    bjFst_nests.to_csv(os.path.join(fstsP, 'nests.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
+    bjFst_pops.to_csv(os.path.join(fstsP, 'pops.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
 
 
 
+    plot_bjFst(bjFst_nests, 'nests')
+    plot_bjFst(bjFst_pops, 'pops')
 
+
+
+#plt.errorbar( df['Model'], df['Mean'], yerr=df['SD'], fmt='o', color='Black', elinewidth=3,capthick=3,errorevery=1, alpha=1, ms=4, capsize = 5)
+#plt.bar(df['Model'], df['Mean'],tick_label = df['Model'])##Bar plot
+#plt.xlabel('Model') ## Label on X axis
+#plt.ylabel('Average Performance') ##Label on Y axis
