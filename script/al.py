@@ -237,11 +237,13 @@ def fst_per_site(ac, gtvars, poplvl, subsample= True):
         pairs, nSegAlleles, fst = calcWCfst_per_site(ac, pair, gtvars, idx1, idx2)
         resInf.append((pair[0], len(idx1), pair[1], len(idx2), nSegAlleles))
         resFst.append(fst)
-    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), pd.DataFrame(resFst)
+    resFstDF = pd.DataFrame(resFst).T
+    resFstDF.columns = combs
+    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF #pd.DataFrame(resFst, columns= combs)
 
 
-pops_fstInf, pops_fstVal = fst_per_site(ac_pops_vars, gtvars, poplvl=pops, subsample= True)
-nests_fstInf, nests_fstVal =  fst_per_site(ac_nests_vars, gtvars, poplvl=nests, subsample= True)
+#pops_fstInf, pops_fstVal = fst_per_site(ac_pops_vars, gtvars, poplvl=pops, subsample= True)
+#nests_fstInf, nests_fstVal =  fst_per_site(ac_nests_vars, gtvars, poplvl=nests, subsample= True)
 
 
 
@@ -514,6 +516,8 @@ if __name__ == "__main__":
     print("--------  Plotting variant density and joint site frequency spectra  --------")
 
     pos = variants['variants/POS'][:]
+
+    #pos = allel.SortedIndex(variants['variants/POS'])
     # probably have to subset individual scaffolds for this to have more meaning
     plot_windowed_variant_density(pos, window_size=100000, title='Raw variant density', filename= 'varDensity_window100k.png')
 
@@ -622,6 +626,23 @@ if __name__ == "__main__":
 
     plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
 
+#       plot folded site frequency spectra for pairs of pops (see https://alimanfoo.github.io/2016/06/10/scikit-allel-tour.html)
+
+########    fig, ax = plt.subplots(figsize=(8, 5))
+########    sns.despine(ax=ax, offset=10)
+########    sfs1 = allel.stats.sfs_folded_scaled(ac1)
+########    allel.stats.plot_sfs_folded_scaled(sfs1, ax=ax, label='BFM', n=ac1.sum(axis=1).max())
+########    sfs2 = allel.stats.sfs_folded_scaled(ac2)
+########    allel.stats.plot_sfs_folded_scaled(sfs2, ax=ax, label='AOM', n=ac2.sum(axis=1).max())
+########    ax.legend()
+########    ax.set_title('Scaled folded site frequency spectra')
+########    # workaround bug in scikit-allel re axis naming
+########    ax.set_xlabel('minor allele frequency');
+
+
+
+
+
     # combine plots for each pop in one figure (we'll deal with this, once we've decided what will be used...
 
     #def plot_jsfs_nests(ac, fname):
@@ -675,8 +696,8 @@ if __name__ == "__main__":
 
     print("---  Calculating Weir & Cockerham's Fst with std.err from block-jackknife  ---")
 
-    bjFst_nests = fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, fname= 'nests', blen= 10000, subsample=True)
-    bjFst_pops = fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, fname= 'pops', blen= 10000, subsample=True)
+    bjFst_nests = fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, blen= 10000, subsample=True)
+    bjFst_pops = fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, blen= 10000, subsample=True)
 
     bjFst_nests.to_csv(os.path.join(fstsP, 'nests.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
     bjFst_pops.to_csv(os.path.join(fstsP, 'pops.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
@@ -687,6 +708,61 @@ if __name__ == "__main__":
     plot_bjFst(bjFst_pops, 'pops')
 
     print("--- Calculating per-site W & C Fst ---")
+
+    pops_fstInf, pops_fstVal = fst_per_site(ac_pops_vars, gtvars, poplvl=pops, subsample= True)
+    nests_fstInf, nests_fstVal =  fst_per_site(ac_nests_vars, gtvars, poplvl=nests, subsample= True)
+
+    pops_fstInf.to_csv(os.path.join(fstsP, 'pops.wcFst.inf.evenN.txt' ), header=True, index=False, sep= '\t')
+    pops_fstVal.to_csv(os.path.join(fstsP, 'pops.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
+    nests_fstInf.to_csv(os.path.join(fstsP, 'nests.wcFst.inf.evenN.txt' ), header=True, index=False, sep= '\t')
+    nests_fstVal.to_csv(os.path.join(fstsP, 'nests.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
+
+
+
+def plot_fst_per_site(df, dfInf, fname):
+    fig, ax = plt.subplots(figsize= (7,5))
+    df.boxplot()
+    plt.xlabel("pairs")
+    plt.ylabel("$F_{ST}$")
+    ax.set_xticklabels(dfInf['pair1'] + ' - ' + dfInf['pair2'], rotation= 40, ha= 'right', fontsize= 8)
+    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.pdf'])), bbox_inches='tight')
+
+
+plot_fst_per_site(pops_fstVal, pops_fstInf, fname= 'pops')
+plot_fst_per_site(nests_fstVal, nests_fstInf, fname= 'nests')
+
+
+def getOutlier(dist):
+    q1 = dist.quantile(0.25)
+    q3 = dist.quantile(0.75)
+    iqr = q3-q1 #Interquartile range
+    #fence_low  = q1-1.5*iqr
+    fence_high = q3+1.5*iqr
+    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
+    out = dist.loc[(dist > fence_high)]
+    return out
+
+pops_fstVal.apply(getOutlier)
+
+pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
+
+
+# index loci
+scaf = variants['variants/CHROM'][:]
+bp = variants['variants/POS'][:]
+
+
+#def remove_outlier(df, col_name):
+#    q1 = df[col_name].quantile(0.25)
+#    q3 = df[col_name].quantile(0.75)
+#    iqr = q3-q1 #Interquartile range
+#    fence_low  = q1-1.5*iqr
+#    fence_high = q3+1.5*iqr
+#    df_in = df.loc[(df[col_name] > fence_low) & (df[col_name] <= fence_high)]
+#    df_out = df.loc[(df[col_name] > fence_high)]
+#    return df_out, df_in
+
+
 
 
 
