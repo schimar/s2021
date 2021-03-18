@@ -25,5 +25,4 @@ dependencies:
   - vcftools=0.1.16
   - pip=20.1.1
   - pip:
-    - qctool==2.0.7
-    - varname==0.6.3
+      - qctool==2.0.7
