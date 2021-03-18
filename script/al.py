@@ -181,7 +181,7 @@ def calcWCfst_bj_knife(ac, pairs, gtvars, idx1, idx2, blen):
 #calcWCfst_bj_knife(ac_nests_vars, ('A2', 'S1'), gtvars, nests['A2'], nests['S1'], blen=10000)
 #calcWCfst_bj_knife(ac_pops_vars, ('A', 'S'), gtvars, pops['A'], pops['S'], blen=10000)
 
-def fst_bj_knife_pair(ac, gtvars, poplvl, fname, blen=10000, subsample= False):
+def fst_bj_knife_pair(ac, gtvars, poplvl, blen=10000, subsample= True):
     tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
     combs = list(combinations(tmpDict, 2))
     res = list()
@@ -199,8 +199,6 @@ def fst_bj_knife_pair(ac, gtvars, poplvl, fname, blen=10000, subsample= False):
     return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')) #.to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
     #else:
     #    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
-    #### name them according to pop or nest (with varname.nameof - but no conda package...)
-    ## make figures with barplots? (Fst <0 to 0?)
 
 
 def plot_bjFst(df, fname):
@@ -212,6 +210,38 @@ def plot_bjFst(df, fname):
     ax.set_xticklabels(df['pair1'] + ' - ' + df['pair2'], rotation= 40, ha= 'right', fontsize= 8)
     fig.savefig(os.path.join(fstfP, '.'.join([fname, 'bjFst_bar.pdf'])), bbox_inches='tight')
 
+def calcWCfst_per_site(ac, pairs, gtvars, idx1, idx2):
+    acu = al.AlleleCountsArray(ac[pairs[0]][:] + ac[pairs[1]][:])
+    flt = acu.is_segregating() & (acu.max_allele() == 1)
+    gtmp = gtvars.compress(flt, axis=0)
+    # Weir & Cockerham's
+    a, b, c = al.weir_cockerham_fst(gtmp, subpops=[ idx1, idx2 ], max_allele=1)
+    with np.errstate(divide='ignore', invalid='ignore'):
+        snp_fst = (a / (a + b + c))[:,0]
+    return pairs, np.count_nonzero(flt), snp_fst
+
+
+def fst_per_site(ac, gtvars, poplvl, subsample= True):
+    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
+    combs = list(combinations(tmpDict, 2))
+    resInf = list()
+    resFst = list()
+    for pair in combs:
+        if subsample:
+            minlen = min(len(poplvl[pair[0]]), len(poplvl[pair[1]]))
+            idx1 = random.sample(poplvl[pair[0]], minlen)
+            idx2 = random.sample(poplvl[pair[1]], minlen)
+        else:
+            idx1 = poplvl[pair[0]]
+            idx2 = poplvl[pair[1]]
+        pairs, nSegAlleles, fst = calcWCfst_per_site(ac, pair, gtvars, idx1, idx2)
+        resInf.append((pair[0], len(idx1), pair[1], len(idx2), nSegAlleles))
+        resFst.append(fst)
+    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), pd.DataFrame(resFst)
+
+
+pops_fstInf, pops_fstVal = fst_per_site(ac_pops_vars, gtvars, poplvl=pops, subsample= True)
+nests_fstInf, nests_fstVal =  fst_per_site(ac_nests_vars, gtvars, poplvl=nests, subsample= True)
 
 
 
@@ -655,6 +685,8 @@ if __name__ == "__main__":
 
     plot_bjFst(bjFst_nests, 'nests')
     plot_bjFst(bjFst_pops, 'pops')
+
+    print("--- Calculating per-site W & C Fst ---")
 
 
 
