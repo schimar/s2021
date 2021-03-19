@@ -26,7 +26,7 @@ rule alStats:
 
 rule gemma_mg:
   input:
-    vcf = 'vars/ta{vartype}.vcf'
+    vcf = 'vars/ta{vartype}Bypop.vcf'
   output:
     mg = 'vars/ta{vartype}/stats/gemma/{vartype}.mg'
   message:
