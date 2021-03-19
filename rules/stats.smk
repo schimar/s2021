@@ -24,4 +24,15 @@ rule alStats:
     script/al.py {input.zarr}
     """
 
+rule gemma_mg:
+  input:
+    vcf = 'vars/ta{vartype}.vcf'
+  output:
+    mg = 'vars/ta{vartype}/stats/gemma/{vartype}.mg'
+  message:
+    """--- Converting {vartype} vcf to bimbam format ---"""
+  shell:
+    """
+    script/vcf2mg.py {input.vcf} > {output.mg}
+    """
 
