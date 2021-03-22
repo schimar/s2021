@@ -787,7 +787,7 @@ def getOutlier(dist):
     #fence_low  = q1-1.5*iqr
     fence_high = q3+1.5*iqr
     #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
-    out = dist.loc[(dist > fence_high)]
+    out = dist > fence_high#dist.loc[(dist > fence_high)]
     return out
 
 
@@ -795,7 +795,8 @@ def getOutlier(dist):
 
 #pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
 
-
+## now returning the boolean for easier indexing
+scafbp[pops_is_seg['A_S']][getOutlier(pops_pwFstScafBp['A_S']['wcFst'])]
 # index loci
 
 
