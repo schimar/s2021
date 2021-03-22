@@ -174,9 +174,10 @@ def calcWCfst_bj_knife(ac, pairs, gtvars, idx1, idx2, blen):
     acu = al.AlleleCountsArray(ac[pairs[0]][:] + ac[pairs[1]][:])
     is_seg = acu.is_segregating() & (acu.max_allele() == 1)
     gtmp = gtvars.compress(is_seg, axis=0)
+    segSitesPos = scafbp[getScafBp(idx, is_seg)]
     # Weir & Cockerham's
-    fst, se, vb, _ = al.stats.fst.blockwise_weir_cockerham_fst(gtseg_vars, subpops=[idx1, idx2], blen=blen, max_allele=1)
-    return fst, se, vb, pairs, np.count_nonzero(is_seg), is_seg
+    fst, se, vb, vj = al.stats.fst.average_weir_cockerham_fst(gtseg_vars, subpops=[idx1, idx2], blen=blen, max_allele=1)
+    return fst, se, vb, pairs, np.count_nonzero(is_seg), segSitesPos, is_seg
 
 #calcWCfst_bj_knife(ac_nests_vars, ('A2', 'S1'), gtvars, nests['A2'], nests['S1'], blen=10000)
 #calcWCfst_bj_knife(ac_pops_vars, ('A', 'S'), gtvars, pops['A'], pops['S'], blen=10000)
@@ -185,6 +186,8 @@ def fst_bj_knife_pair(ac, gtvars, poplvl, blen=10000, subsample= True):
     tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
     combs = list(combinations(tmpDict, 2))
     res = list()
+    resPerPair = dict()
+    is_seg_dict = dict()
     for pair in combs:
         if subsample:
             minlen = min(len(poplvl[pair[0]]), len(poplvl[pair[1]]))
@@ -193,17 +196,13 @@ def fst_bj_knife_pair(ac, gtvars, poplvl, blen=10000, subsample= True):
         else:
             idx1 = poplvl[pair[0]]
             idx2 = poplvl[pair[1]]
-        wc, se, vb, pairs, nSegVars, is_seg = calcWCfst_bj_knife(ac, pair, gtvars, idx1, idx2, blen)    # NOTE: add is_seg to output below???!!!
+        wc, se, vb, pairs, nSegVars, segSitesPos, is_seg = calcWCfst_bj_knife(ac, pair, gtvars, idx1, idx2, blen)    # NOTE: add is_seg to output below???!!!
         res.append((pairs[0], len(idx1), pairs[1], len(idx2), nSegVars, wc, se))
-    #if subsample:
-    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')) #.to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.evenN.txt' ])), header=True, index=False, sep= '\t')
-    #else:
-    #    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')).to_csv(os.path.join(fstsP, ''.join([ fname, '.bjknife.wcFst.txt' ])), header=True, index=False, sep= '\t')
-def getScafBp(varsIDX, selVars):
-    if len(varsIDX) != len(selVars):
-        raise ValueError('A very specific bad thing happened.')
-    else:
-        return varsIDX.astype('int64')[selVars]
+        pwScafBp = pd.DataFrame({'scafbp': segSitesPos})
+        resPerPair['_'.join([pair[0], pair[1]])] = pwScafBp
+        is_seg_dict['_'.join([pair[0], pair[1]])] = is_seg
+
+    return pd.DataFrame(res, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles', 'bjknife.wcFst', 'std.err.wcFst')), resPerPair, is_seg_dict
 
 
 
@@ -216,38 +215,16 @@ def plot_bjFst(df, fname):
     ax.set_xticklabels(df['pair1'] + ' - ' + df['pair2'], rotation= 40, ha= 'right', fontsize= 8)
     fig.savefig(os.path.join(fstfP, '.'.join([fname, 'bjFst_bar.pdf'])), bbox_inches='tight')
 
-#def calcWCfst_per_site(ac, pairs, gtvars, idx1, idx2):
-#    acu = al.AlleleCountsArray(ac[pairs[0]][:] + ac[pairs[1]][:])
-#    flt = acu.is_segregating() & (acu.max_allele() == 1)
-#    gtmp = gtvars.compress(flt, axis=0)
-#    segSitesPos = scafbp[getScafbp(idx, flt)]
-#    # Weir & Cockerham's
-#    a, b, c = al.weir_cockerham_fst(gtmp, subpops=[ idx1, idx2 ], max_allele=1)
-#    with np.errstate(divide='ignore', invalid='ignore'):
-#        snp_fst = (a / (a + b + c))[:,0]
-#    return pairs, np.count_nonzero(flt), snp_fst, segSitesPos
-#
-#
-#def fst_per_site(ac, gtvars, poplvl, subsample= True):
-#    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
-#    combs = list(combinations(tmpDict, 2))
-#    resInf = list()
-#    resFst = list()
-#    for pair in combs:
-#        if subsample:
-#            minlen = min(len(poplvl[pair[0]]), len(poplvl[pair[1]]))
-#            idx1 = random.sample(poplvl[pair[0]], minlen)
-#            idx2 = random.sample(poplvl[pair[1]], minlen)
-#        else:
-#            idx1 = poplvl[pair[0]]
-#            idx2 = poplvl[pair[1]]
-#        pairs, nSegAlleles, fst, segSitesPos = calcWCfst_per_site(ac, pair, gtvars, idx1, idx2)
-#        resInf.append((pair[0], len(idx1), pair[1], len(idx2), nSegAlleles))
-#        resFst.append(fst)
-#
-#    resFstDF = pd.DataFrame(resFst).T
-#    resFstDF.columns = combs
-#    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF, pd.Series(segSitesPos) #pd.DataFrame(resFst, columns= combs)
+
+
+
+def getScafBp(varsIDX, selVars):
+    if len(varsIDX) != len(selVars):
+        raise ValueError('A very specific bad thing happened.')
+    else:
+        return varsIDX.astype('int64')[selVars]
+
+
 
 def calcWCfst_per_site(ac, pairs, gtvars, idx1, idx2):
     acu = al.AlleleCountsArray(ac[pairs[0]][:] + ac[pairs[1]][:])
@@ -284,11 +261,8 @@ def fst_per_site(ac, gtvars, poplvl, subsample= True):
         is_seg_dict['_'.join([pair[0], pair[1]])] = is_seg
     resFstDF = pd.DataFrame(resFst).T
     resFstDF.columns = combs
-    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF, resFstPerPair, is_seg_dict  #pd.DataFrame(resFst, columns= combs)
+    return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF, resFstPerPair, is_seg_dict
 
-
-#pops_fstInf, pops_fstVal = fst_per_site(ac_pops_vars, gtvars, poplvl=pops, subsample= True)
-#nests_fstInf, nests_fstVal =  fst_per_site(ac_nests_vars, gtvars, poplvl=nests, subsample= True)
 
 
 
@@ -314,15 +288,15 @@ if __name__ == "__main__":
     sfsP = os.path.join(figsP, 'jsfs/')
     fstsP = os.path.join(zarrname, 'stats/al/fst/')
     fstfP = os.path.join(zarrname, 'figs/al/fst/')
-fstsPnests = os.path.join(zarrname, 'stats/al/fst/nests/')
-fstsPpops = os.path.join(zarrname, 'stats/al/fst/pops/')
+    fstsPnests = os.path.join(zarrname, 'stats/al/fst/nests/')
+    fstsPpops = os.path.join(zarrname, 'stats/al/fst/pops/')
 
 
 
-folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP]
-for folder in folderList:
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP]
+    for folder in folderList:
+        if not os.path.exists(folder):
+            os.makedirs(folder)
 
 
 
@@ -754,11 +728,17 @@ for folder in folderList:
 
     print("---  Calculating Weir & Cockerham's Fst with std.err from block-jackknife  ---")
 
-    bjFst_nests = fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, blen= 10000, subsample=True)
-    bjFst_pops = fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, blen= 10000, subsample=True)
+    bjFst_nests, nests_bjFstScafBp, nests_bjFst_is_seg = fst_bj_knife_pair(ac_nests_vars, gtvars, poplvl=nests, blen= 10000, subsample=True)
+    bjFst_pops, pops_bjFstScafBp, pops_bjFst_is_seg = fst_bj_knife_pair(ac_pops_vars, gtvars, poplvl=pops, blen= 10000, subsample=True)
 
     bjFst_nests.to_csv(os.path.join(fstsP, 'nests.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
     bjFst_pops.to_csv(os.path.join(fstsP, 'pops.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
+
+for pair, df in nests_bjFstScafBp.items():
+    df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
+
+for pair, df in pops_bjFstScafBp.items():
+    df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
 
 
 
@@ -775,11 +755,12 @@ for folder in folderList:
     nests_fstInf.to_csv(os.path.join(fstsP, 'nests.wcFst.inf.evenN.txt' ), header=True, index=False, sep= '\t')
     nests_fstVal.to_csv(os.path.join(fstsP, 'nests.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
 
+
     for pair, df in pops_pwFstScafBp.items():
-        df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_persite.txt'])), header= True, index= False, sep= '\t')
+        df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_persite.scafbp'])), header= True, index= False, sep= '\t')
 
     for pair, df in nests_pwFstScafBp.items():
-        df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_persite.txt'])), header= True, index= False, sep= '\t')
+        df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_persite.scafbp'])), header= True, index= False, sep= '\t')
 
 
 
@@ -794,8 +775,9 @@ def plot_fst_per_site(df, dfInf, fname):
     fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.pdf'])), bbox_inches='tight')
 
 
-plot_fst_per_site(pops_fstVal, pops_fstInf, fname= 'pops')
-plot_fst_per_site(nests_fstVal, nests_fstInf, fname= 'nests')
+    plot_fst_per_site(pops_fstVal, pops_fstInf, fname= 'pops')
+    plot_fst_per_site(nests_fstVal, nests_fstInf, fname= 'nests')
+
 
 
 def getOutlier(dist):
@@ -808,21 +790,18 @@ def getOutlier(dist):
     out = dist.loc[(dist > fence_high)]
     return out
 
-pops_fstVal.apply(getOutlier)
 
-pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
+#pops_fstVal.apply(getOutlier)
+
+#pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
 
 
 # index loci
-scaf = variants['variants/CHROM'][:]
-bp = variants['variants/POS'][:]
-
-scafbp = scaf + ':' + list(map(str, bp))
 
 
-idx = al.UniqueIndex(np.arange(0, len(scafbp)))
+#idx = al.UniqueIndex(np.arange(0, len(scafbp)))
 
-scafbp[getScafBp(idx, is_seg)]
+#scafbp[getScafBp(idx, is_seg)]
 
 
 #def remove_outlier(df, col_name):
