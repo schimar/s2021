@@ -527,7 +527,7 @@ if __name__ == "__main__":
 
     ## get the Eigen values for PCAs
 
-    # for all (segreg.) vars (n = 1,319,775)
+    # for all (segreg.) vars
     segScafs = variants['variants/CHROM'][:][segAll_vars]
     segBP = variants['variants/POS'][:][segAll_vars]
     segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
