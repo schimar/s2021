@@ -23,7 +23,7 @@ rule all:
 	    expand('vars/ta{vartype}/al.done', vartype=['SubInDel', 'InDel', 'Sub']),
 	    #expand('vars/ta{vartype}/stats/gemma/vars_seg.gemma.scafbp', vartype=['SubInDel', 'InDel', 'Sub']), ### output for rule alStats and input for rule gemma
 	    ##expand('vars/ta{vartype}/stats/gemma/ta{vartype}.mg', vartype=['SubInDel', 'InDel', 'Sub']),
-	    expand('vars/taSubInDel/stats/gemma/taSubInDel.mg', vartype=['SubInDel', 'InDel', 'Sub']),
+	    'vars/taSubInDel/stats/gemma/taSubInDel.mg',
 	    #expand('vars/ta{vartype}/stats/gemma/ta{vartype}.pheno', vartype=['SubInDel', 'InDel', 'Sub']),
 	    'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat',
 	    'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
