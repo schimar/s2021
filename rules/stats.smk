@@ -36,3 +36,33 @@ rule gemma_mg:
     script/vcf2mg.py {input.vcf} > {output.mg}
     """
 
+rule gemma_relmat_stdzd:
+  input:
+    mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg'
+    pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
+  output:
+    relM = 'vars/ta{vartype}/stats/gemma/ta{vartype}.stdzd.relmat'
+  message:
+    """--- Calculating standardized relatedness matrix with gemma ---"""
+  shell:
+    """
+    gemma -g {input.mg} -p {input.pheno} -gk 2 -o {output.relM}
+    """
+
+rule gemma_relmat_ctrd:
+  # NOTE: see **manual 4.4.2** on details regarding centered vs standardized rel.matrix
+  input:
+    mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg'
+    pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
+  output:
+    relM = 'vars/ta{vartype}/stats/gemma/ta{vartype}.ctrd.relmat'
+  message:
+    """--- Calculating centered relatedness matrix with gemma ---"""
+  shell:
+    """
+    gemma -g {input.mg} -p {input.pheno} -gk 1 -o {output.relM}
+    """
+
+
+
+

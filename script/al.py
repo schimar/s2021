@@ -220,7 +220,7 @@ def plot_bjFst(df, fname):
 
 def getScafBp(varsIDX, selVars):
     if len(varsIDX) != len(selVars):
-        raise ValueError('A very specific bad thing happened.')
+        raise ValueError('The two supplied files can not have different lengths')
     else:
         return varsIDX.astype('int64')[selVars]
 
@@ -279,6 +279,8 @@ if __name__ == "__main__":
     zarrname = zarrPath.strip('.zarr/')
     # create folders
 
+    varname = zarrname.split('/')[1]
+
     statsP = os.path.join(zarrname, 'stats/al/')
     figsP = os.path.join(zarrname, 'figs/al/')
     pcafP = os.path.join(figsP, 'pca/')      # pca figs
@@ -290,10 +292,11 @@ if __name__ == "__main__":
     fstfP = os.path.join(zarrname, 'figs/al/fst/')
     fstsPnests = os.path.join(zarrname, 'stats/al/fst/nests/')
     fstsPpops = os.path.join(zarrname, 'stats/al/fst/pops/')
+    gemmasP = os.path.join(zarrname, 'stats/gemma/')
 
 
 
-    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP]
+    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, gemmasP]
     for folder in folderList:
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -367,9 +370,12 @@ if __name__ == "__main__":
     gtseg_is_het['hom'] = 1-gtseg_is_het['het']
     gtseg_is_het.to_csv(os.path.join(statsP, 'nSegHets.txt'), header=True, index=True, sep= '\t')
 
-
-
     ac_nests_vars = gtvars.count_alleles_subpops(nests, max_allele=1)
+
+    # write pheno file (for gemma)
+    phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
+    phenos.to_csv(os.path.join(gemmasP, '.'.join([ varname, 'pheno' ])), sep= ' ', index= False, header= False)
+
 
     # nSeg per pop/nest as DataFrame:
     popseg = dict()
@@ -526,7 +532,7 @@ if __name__ == "__main__":
     segBP = variants['variants/POS'][:][segAll_vars]
     segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
     ## for gemma:
-    segVars.to_csv(os.path.join(statsP, 'vars_Segregate.gemma.scafbp'), sep= ' ', index= False, header= False)
+    segVars.to_csv(os.path.join(gemmasP, 'vars_seg.gemma.scafbp'), sep= ' ', index= False, header= False)
 
 
 
@@ -740,10 +746,10 @@ for pair, df in nests_bjFstScafBp.items():
 for pair, df in pops_bjFstScafBp.items():
     df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
 
-
-
     plot_bjFst(bjFst_nests, 'nests')
     plot_bjFst(bjFst_pops, 'pops')
+
+
 
     print("--- Calculating per-site W & C Fst ---")
 
@@ -787,16 +793,25 @@ def getOutlier(dist):
     #fence_low  = q1-1.5*iqr
     fence_high = q3+1.5*iqr
     #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
-    out = dist > fence_high#dist.loc[(dist > fence_high)]
+    out = dist.loc[(dist > fence_high)]
     return out
 
+def getOutlier_idx(dist):
+    q1 = dist.quantile(0.25)
+    q3 = dist.quantile(0.75)
+    iqr = q3-q1 #Interquartile range
+    #fence_low  = q1-1.5*iqr
+    fence_high = q3+1.5*iqr
+    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
+    out = dist > fence_high
+    return out
 
 #pops_fstVal.apply(getOutlier)
 
-#pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
+pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
 
 ## now returning the boolean for easier indexing
-scafbp[pops_is_seg['A_S']][getOutlier(pops_pwFstScafBp['A_S']['wcFst'])]
+scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
 # index loci
 
 
@@ -804,18 +819,30 @@ scafbp[pops_is_seg['A_S']][getOutlier(pops_pwFstScafBp['A_S']['wcFst'])]
 
 #scafbp[getScafBp(idx, is_seg)]
 
-
-#def remove_outlier(df, col_name):
-#    q1 = df[col_name].quantile(0.25)
-#    q3 = df[col_name].quantile(0.75)
-#    iqr = q3-q1 #Interquartile range
-#    fence_low  = q1-1.5*iqr
-#    fence_high = q3+1.5*iqr
-#    df_in = df.loc[(df[col_name] > fence_low) & (df[col_name] <= fence_high)]
-#    df_out = df.loc[(df[col_name] > fence_high)]
-#    return df_out, df_in
+print("--- Calculating correlations and plotting heatmaps ---")
 
 
+fig = plt.figure(figsize=(14,6))
+ax = fig.add_subplot(1,2,1)
+sns.heatmap(xLDpruned.corr(), cmap= 'coolwarm', annot= True)
+ax.set_title('correlation with PCs of LD pruned loci (185,858)')
+
+ax = fig.add_subplot(1,2,2)
+sns.heatmap(xSeg.corr(), cmap= 'coolwarm', annot= True)
+ax.set_title('correlation with PCs of segregated loci (1,319,775)')
+plt.tight_layout()
+#['started_aggression', 'reacted_aggressively', 'reacted_peacefully']
+
+fig = plt.figure(figsize=(14,6))
+ax = fig.add_subplot(1,2,1)
+sns.heatmap(xLDpruned.cov(), cmap= 'coolwarm', annot= True)
+ax.set_title('covariance with PCs of LD pruned loci (185,858)')
+plt.tight_layout()
+
+ax = fig.add_subplot(1,2,2)
+sns.heatmap(xSeg.cov(), cmap= 'coolwarm', annot= True)
+ax.set_title('covariance with PCs of segregating loci (1,319,775)')
+plt.tight_layout()
 
 
 
