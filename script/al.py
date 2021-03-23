@@ -808,10 +808,12 @@ def getOutlier_idx(dist):
 
 #pops_fstVal.apply(getOutlier)
 
-pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
+#pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
 
 ## now returning the boolean for easier indexing
-scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
+#scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
+
+
 # index loci
 
 
@@ -819,30 +821,30 @@ scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
 
 #scafbp[getScafBp(idx, is_seg)]
 
-print("--- Calculating correlations and plotting heatmaps ---")
-
-
-fig = plt.figure(figsize=(14,6))
-ax = fig.add_subplot(1,2,1)
-sns.heatmap(xLDpruned.corr(), cmap= 'coolwarm', annot= True)
-ax.set_title('correlation with PCs of LD pruned loci (185,858)')
-
-ax = fig.add_subplot(1,2,2)
-sns.heatmap(xSeg.corr(), cmap= 'coolwarm', annot= True)
-ax.set_title('correlation with PCs of segregated loci (1,319,775)')
-plt.tight_layout()
-#['started_aggression', 'reacted_aggressively', 'reacted_peacefully']
-
-fig = plt.figure(figsize=(14,6))
-ax = fig.add_subplot(1,2,1)
-sns.heatmap(xLDpruned.cov(), cmap= 'coolwarm', annot= True)
-ax.set_title('covariance with PCs of LD pruned loci (185,858)')
-plt.tight_layout()
-
-ax = fig.add_subplot(1,2,2)
-sns.heatmap(xSeg.cov(), cmap= 'coolwarm', annot= True)
-ax.set_title('covariance with PCs of segregating loci (1,319,775)')
-plt.tight_layout()
+#print("--- Calculating correlations and plotting heatmaps ---")
+#
+#
+#fig = plt.figure(figsize=(14,6))
+#ax = fig.add_subplot(1,2,1)
+#sns.heatmap(xLDpruned.corr(), cmap= 'coolwarm', annot= True)
+#ax.set_title('correlation with PCs of LD pruned loci (185,858)')
+#
+#ax = fig.add_subplot(1,2,2)
+#sns.heatmap(xSeg.corr(), cmap= 'coolwarm', annot= True)
+#ax.set_title('correlation with PCs of segregated loci (1,319,775)')
+#plt.tight_layout()
+##['started_aggression', 'reacted_aggressively', 'reacted_peacefully']
+#
+#fig = plt.figure(figsize=(14,6))
+#ax = fig.add_subplot(1,2,1)
+#sns.heatmap(xLDpruned.cov(), cmap= 'coolwarm', annot= True)
+#ax.set_title('covariance with PCs of LD pruned loci (185,858)')
+#plt.tight_layout()
+#
+#ax = fig.add_subplot(1,2,2)
+#sns.heatmap(xSeg.cov(), cmap= 'coolwarm', annot= True)
+#ax.set_title('covariance with PCs of segregating loci (1,319,775)')
+#plt.tight_layout()
 
 
 
