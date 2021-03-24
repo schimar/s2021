@@ -264,6 +264,30 @@ def fst_per_site(ac, gtvars, poplvl, subsample= True):
     return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF, resFstPerPair, is_seg_dict
 
 
+def plot_fsfs(gtvars, pops, fname, cols, subsample=True):
+    popDict = { key: pops[key] for key in pops if key not in ['all'] }
+    popDictlen = {key: len(value) for key, value in popDict.items()}
+    if subsample:
+        minIDlen = min(popDictlen.values())
+        tmpPopDict = {key: random.sample(value, minIDlen) for key, value in popDict.items()}
+        ac = gtvars.count_alleles_subpops(tmpPopDict, max_allele=1)
+    else:
+        tmpPopDict = popDict
+        ac = gtvars.count_alleles_subpops(tmpPopDict, max_allele=1)
+    fig, ax = plt.subplots(figsize=(8,8))
+    acs = list()
+    for key, alco in ac.items():
+        sns.despine(ax=ax, offset=5)
+        actmp = ac[key]
+        sfs = al.stats.sf.sfs_folded_scaled(actmp)
+        al.stats.sf.plot_sfs_folded(sfs, ax=ax, label=key, plot_kwargs={'color': cols[key]}, n=None)
+        ax.legend()
+        if subsample:
+            ax.set_title('Folded site frequency spectra (' + str(minIDlen) + ' ind.)')
+        else:
+            ax.set_title('Folded site frequency spectra (uneven N inds)')
+        fig.savefig(os.path.join(sfsP, '.'.join([fname, 'png' ])), bbox_inches='tight')
+
 
 
 
@@ -287,7 +311,7 @@ if __name__ == "__main__":
     pcasP = os.path.join(statsP, 'pca/')     # pca stats
     varDenseP = os.path.join(figsP, 'varDense/')
     hetfP = os.path.join(figsP, 'hets/')
-    sfsP = os.path.join(figsP, 'jsfs/')
+    sfsP = os.path.join(figsP, 'sfs/')
     fstsP = os.path.join(zarrname, 'stats/al/fst/')
     fstfP = os.path.join(zarrname, 'figs/al/fst/')
     fstsPnests = os.path.join(zarrname, 'stats/al/fst/nests/')
@@ -656,75 +680,25 @@ if __name__ == "__main__":
     # plot joint SFS for pops
 
 
-    plot_jsfs(ac_pops_vars, fname= 'jsfs')
+    plot_jsfs(ac_pops_vars, fname= 'pops.jsfs')
+
+
+    plot_jsfs_nests(ac_nests_vars, fname= 'nests.jsfs')
 
 
 
+    # plot folded site frequency spectra for pairs of pops (see https://alimanfoo.github.io/2016/06/10/scikit-allel-tour.html)
+
+    plot_fsfs(gtvars, pops, fname='pops.fsfs', cols= pop_cols, subsample=True)
+    plot_fsfs(gtvars, pops, fname='pops.fsfs.unevenN', cols= pop_cols, subsample=False)
+
+    plot_fsfs(gtvars, nests, fname='nests.fsfs', cols= nest_cols, subsample=True)
+    plot_fsfs(gtvars, nests, fname='nests.fsfs.unevenN', cols= nest_cols, subsample=False)
+
+    # when excess of rare variants, then suggesting a population expansion
+    # when closer to neutral expectation, suggesting a more stable population size.
 
 
-    plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
-
-#       plot folded site frequency spectra for pairs of pops (see https://alimanfoo.github.io/2016/06/10/scikit-allel-tour.html)
-
-########    fig, ax = plt.subplots(figsize=(8, 5))
-########    sns.despine(ax=ax, offset=10)
-########    sfs1 = allel.stats.sfs_folded_scaled(ac1)
-########    allel.stats.plot_sfs_folded_scaled(sfs1, ax=ax, label='BFM', n=ac1.sum(axis=1).max())
-########    sfs2 = allel.stats.sfs_folded_scaled(ac2)
-########    allel.stats.plot_sfs_folded_scaled(sfs2, ax=ax, label='AOM', n=ac2.sum(axis=1).max())
-########    ax.legend()
-########    ax.set_title('Scaled folded site frequency spectra')
-########    # workaround bug in scikit-allel re axis naming
-########    ax.set_xlabel('minor allele frequency');
-
-
-
-
-
-    # combine plots for each pop in one figure (we'll deal with this, once we've decided what will be used...
-
-    #def plot_jsfs_nests(ac, fname):
-    #    tmpDict = { key: ac[key] for key in ac if key not in ['all'] }
-    #    for pop in ['A', 'N', 'S']:
-    #        popDict = { k: v for k, v in tmpDict.items() if pop in k }
-    #        nestCombs = list(combinations(popDict, 2))
-    #        fig = plt.figure(figsize=(15, 5))
-    #
-    #        for i, nestPair in enumerate(nestCombs):
-    #            print(i, nestPair)
-    #            ax = fig.add_subplot(1,3,i+1)
-    #            jsfs = al.stats.sf.joint_sfs(ac[nestPair[0]][:,1], ac[nestPair[1]][:,1])
-    #            #fig, ax = plt.subplots(figsize=(6,6))
-    #            al.stats.sf.plot_joint_sfs(jsfs, ax=ax)
-    #            ax.set_ylabel(' '.join(['Alternate allele count,', nestPair[0] ]))
-    #            ax.set_xlabel(' '.join(['Alternate allele count,', nestPair[1] ]))
-    #            ax.cla()
-    #        #fig.savefig(os.path.join(sfsP, '.'.join([fname, pop, 'png' ])), bbox_inches='tight')
-    #        ##p.remove()
-    #
-    #
-    #plot_jsfs_nests(ac_nests_vars, fname= 'jsfs_nests')
-
-
-    # sample code for the above (from https://stackoverflow.com/questions/19053077/looping-over-data-and-creating-individual-figures#19053157 )
-
-    #fig = plt.figure()
-    #ax = fig.addsubplot(111)
-    #
-    ## Tinker with labels and spines
-    #ax.set_xlabel(...)
-    #ax.set_ylabel(...)
-    #[a.label.set_color('black') for a in (ax.xaxis, ax.yaxis)]
-    #...
-    #
-    ## Plot data and save figures
-    #for mol in mols:
-    #    for energy, density in data:
-    #        ax.cla() # or ax.clear()
-    #        p, = ax.plot(density, energy, 'ro')
-    #
-    #        fig.savefig(mol+".png")
-    #        p.remove() # rem
 
 
 
@@ -767,9 +741,6 @@ for pair, df in pops_bjFstScafBp.items():
 
     for pair, df in nests_pwFstScafBp.items():
         df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_persite.scafbp'])), header= True, index= False, sep= '\t')
-
-
-
 
 
 def plot_fst_per_site(df, dfInf, fname):
