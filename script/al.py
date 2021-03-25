@@ -379,6 +379,13 @@ if __name__ == "__main__":
     # check if the ids are in the same order
     # np.all(list(variants['samples'][:]) == ids['id_nest'])
 
+    # add variable 'agg' (with 0 = started aggression, 1 = reacted peacefully, 2 = reacted aggressively)
+    ids['agg'] = 0
+    ids['agg'][ids['started_aggression'] == 1] = 0
+    ids['agg'][ids['reacted_peacefully'] == 1] = 1
+    ids['agg'][ids['reacted_aggressively'] == 1] = 2
+
+    # create genotype array
     gtvars = al.GenotypeArray(variants['calldata/GT'])
 
     # get locus ids (for getting scafbp in resp. sets of segregating sites) NOTE: see getScafBp()
@@ -799,15 +806,20 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 
-df1 = ids[['elevation', 'started_aggression', 'reacted_aggressively', 'reacted_peacefully', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
-df1.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon']
+df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
+df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon']
 
 df1.loc[:,'het'] = propHets
+df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
+df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
+
+
+
 
 #df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
 
 df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-df.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'het', 'nest', 'pop', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
 
 
 
@@ -930,16 +942,6 @@ print("--- Calculating correlations and plotting heatmaps ---")
 
 sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
 
-# NOTE: get factors as integers
-df2 = ids[['nest', 'pop', 'elevation', 'started_aggression', 'reacted_aggressively', 'reacted_peacefully', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
-df2.columns = ['nest', 'pop', 'elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon']
-
-df2.loc[:,'het'] = propHets
-
-#df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
-
-df3 = pd.concat([df2, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-df3.columns = ['nest', 'pop', 'elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
 
 
 #
