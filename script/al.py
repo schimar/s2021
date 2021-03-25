@@ -344,6 +344,9 @@ if __name__ == "__main__":
     ids['subsIndex'] = subsIndex
     ids.sort_values(by=['subsIndex'], inplace= True)
     ##
+    # check if the ids are in the same order
+    # np.all(list(variants['samples'][:]) == ids['id_nest'])
+
     gtvars = al.GenotypeArray(variants['calldata/GT'])
 
     # get locus ids (for getting scafbp in resp. sets of segregating sites) NOTE: see getScafBp()
@@ -500,7 +503,9 @@ if __name__ == "__main__":
 
 
     fig_pca(coords1var, model1var, 'LD-pruned PCA', pops = ids['nest'], pcols= nest_cols, filename= 'pca_LDprune.png')
-
+    # which one is the outlier in the LD-pruned PCA?
+    ##np.where(coords1var[:,0] > 200)
+    ##ids.iloc[59]    # 101a_S1
 
     ######
     # pca without LD pruning (random subset of 100000 loci)
@@ -786,13 +791,134 @@ def getOutlier_idx(dist):
 
 
 # index loci
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
 
+
+df1 = ids[['elevation', 'started_aggression', 'reacted_aggressively', 'reacted_peacefully', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
+df1.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon']
+
+df1.loc[:,'het'] = propHets
+
+df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
+
+df2 = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
+df2.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+
+
+
+# NOTE: see https://www.reneshbedre.com/blog/principal-component-analysis.html#pca-loadings-plots
+
+df_st =  StandardScaler().fit_transform(df2)
+
+pca_out = PCA(n_components=10).fit(df_st)
+# Proportion of Variance (from PC1 to PC6)
+pca_out.explained_variance_ratio_
+
+# Cumulative proportion of variance (from PC1 to PC6)
+np.cumsum(pca_out.explained_variance_ratio_)
+
+# component loadings (correlation coefficient between original variables and the component)
+# the squared loadings within the PCs always sums to 1
+loadings = pca_out.components_
+num_pc = pca_out.n_features_
+pc_list = ["PC"+str(i) for i in list(range(1, num_pc+1))]
+loadings_df = pd.DataFrame.from_dict(dict(zip(pc_list, loadings)))
+loadings_df['variable'] = df2.columns.values
+loadings_df = loadings_df.set_index('variable')
+loadings_df
+
+
+# positive and negative values in component loadings reflects the positive and negative
+# correlation of the variables with the PCs (they have a "positive projection" on first PC)
+
+
+# get correlation matrix plot for loadings
+import seaborn as sns
+import matplotlib.pyplot as plt
+ax = sns.heatmap(loadings_df, annot=True, cmap='Spectral')
+plt.show()
+
+
+
+# get eigenvalues (from PC1 to PC6)
+pca_out.explained_variance_
+# get scree plot (for scree or elbow test)
+from bioinfokit.visuz import cluster
+cluster.screeplot(obj=[pc_list, pca_out.explained_variance_ratio_])
+
+
+### or      (rather weird on the y-axis)
+plt.bar(range(1,len(pca_out.explained_variance_ )+1),pca_out.explained_variance_ )
+plt.ylabel('Explained variance')
+plt.xlabel('Components')
+plt.plot(range(1,len(pca_out.explained_variance_ )+1),
+         np.cumsum(pca_out.explained_variance_),
+         c='red',
+         label="Cumulative Explained Variance")
+plt.legend(loc='upper left')
+
+# Scree plot will be saved in the same directory with name screeplot.png
+# get PCA loadings plots (2D and 3D)
+# 2D
+cluster.pcaplot(x=loadings[0], y=loadings[1], labels=df2.columns.values,
+    var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
+    var2=round(pca_out.explained_variance_ratio_[1]*100, 2))
+
+# 3D
+cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df2.columns.values,
+    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
+    var3=round(pca_out.explained_variance_ratio_[2]*100, 2))
+
+
+
+# get PC scores
+pca_scores = PCA().fit_transform(df_st)
+
+# get 2D biplot
+cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df2.columns.values, var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
+    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot= 'lightgrey')#, colorlist=ids['nest'])
+
+# get 3D biplot
+cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df2.columns.values,
+    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
+    var3=round(pca_out.explained_variance_ratio_[2]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot='lightgrey')#, colorlist=ids['nest'])
+
+# datapoints= False
+
+# show = True
+
+# or    (different 2d biplot)       https://ostwalprasad.github.io/machine-learning/PCA-using-python.html
+def myplot(score,coeff,labels=None):
+    xs = score[:,0]
+    ys = score[:,1]
+    n = coeff.shape[0]
+    scalex = 1.0/(xs.max() - xs.min())
+    scaley = 1.0/(ys.max() - ys.min())
+    plt.scatter(xs * scalex,ys * scaley,s=5)
+    for i in range(n):
+        plt.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
+        if labels is None:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color = 'green', ha = 'center', va = 'center')
+        else:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
+
+    plt.xlabel("PC{}".format(1))
+    plt.ylabel("PC{}".format(2))
+    plt.grid()
+
+myplot(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df2.columns))
+
+
+
+# -----------------------------------------------------
+#pd.DataFrame(df_st, columns=df.columns).head(2)
 
 #idx = al.UniqueIndex(np.arange(0, len(scafbp)))
 
 #scafbp[getScafBp(idx, is_seg)]
 
-#print("--- Calculating correlations and plotting heatmaps ---")
+print("--- Calculating correlations and plotting heatmaps ---")
 #
 #
 #fig = plt.figure(figsize=(14,6))
