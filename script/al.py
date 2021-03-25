@@ -264,6 +264,15 @@ def fst_per_site(ac, gtvars, poplvl, subsample= True):
     return pd.DataFrame(resInf, columns= ('pair1', 'n1', 'pair2', 'n2', 'nSegAlleles')), resFstDF, resFstPerPair, is_seg_dict
 
 
+def plot_fst_per_site(df, dfInf, fname):
+    fig, ax = plt.subplots(figsize= (7,5))
+    df.boxplot()
+    plt.xlabel("pairs")
+    plt.ylabel("$F_{ST}$")
+    ax.set_xticklabels(dfInf['pair1'] + ' - ' + dfInf['pair2'], rotation= 40, ha= 'right', fontsize= 8)
+    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.pdf'])), bbox_inches='tight')
+
+
 def plot_fsfs(gtvars, pops, fname, cols, subsample=True):
     popDict = { key: pops[key] for key in pops if key not in ['all'] }
     popDictlen = {key: len(value) for key, value in popDict.items()}
@@ -289,6 +298,27 @@ def plot_fsfs(gtvars, pops, fname, cols, subsample=True):
         fig.savefig(os.path.join(sfsP, '.'.join([fname, 'png' ])), bbox_inches='tight')
 
 
+def getOutlier(dist):
+    q1 = dist.quantile(0.25)
+    q3 = dist.quantile(0.75)
+    iqr = q3-q1 #Interquartile range
+    #fence_low  = q1-1.5*iqr
+    fence_high = q3+1.5*iqr
+    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
+    out = dist.loc[(dist > fence_high)]
+    return out
+
+
+def getOutlier_idx(dist):
+    q1 = dist.quantile(0.25)
+    q3 = dist.quantile(0.75)
+    iqr = q3-q1 #Interquartile range
+    #fence_low  = q1-1.5*iqr
+    fence_high = q3+1.5*iqr
+    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
+    out = dist > fence_high
+    return out
+
 
 
 # --------------------------------------------
@@ -309,6 +339,8 @@ if __name__ == "__main__":
     figsP = os.path.join(zarrname, 'figs/al/')
     pcafP = os.path.join(figsP, 'pca/')      # pca figs
     pcasP = os.path.join(statsP, 'pca/')     # pca stats
+    varpcafP = os.path.join(pcafP, 'varPca/')
+    varpcasP = os.path.join(pcasP, 'varPca/')
     varDenseP = os.path.join(figsP, 'varDense/')
     hetfP = os.path.join(figsP, 'hets/')
     sfsP = os.path.join(figsP, 'sfs/')
@@ -320,7 +352,7 @@ if __name__ == "__main__":
 
 
 
-    folderList = [statsP, figsP, pcasP, pcafP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, gemmasP]
+    folderList = [statsP, figsP, pcasP, pcafP, varpcafP, varpcasP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, gemmasP]
     for folder in folderList:
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -719,11 +751,11 @@ if __name__ == "__main__":
     bjFst_nests.to_csv(os.path.join(fstsP, 'nests.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
     bjFst_pops.to_csv(os.path.join(fstsP, 'pops.bjknife.wcFst.evenN.txt' ), header=True, index=False, sep= '\t')
 
-for pair, df in nests_bjFstScafBp.items():
-    df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
+    for pair, df in nests_bjFstScafBp.items():
+        df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
 
-for pair, df in pops_bjFstScafBp.items():
-    df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
+    for pair, df in pops_bjFstScafBp.items():
+        df.to_csv(os.path.join(fstsPpops, '.'.join(['pops', pair, 'wcFst_bjknife.scafbp'])), header= False, index= False, sep= '\t')
 
     plot_bjFst(bjFst_nests, 'nests')
     plot_bjFst(bjFst_pops, 'pops')
@@ -748,39 +780,11 @@ for pair, df in pops_bjFstScafBp.items():
         df.to_csv(os.path.join(fstsPnests, '.'.join(['nests', pair, 'wcFst_persite.scafbp'])), header= True, index= False, sep= '\t')
 
 
-def plot_fst_per_site(df, dfInf, fname):
-    fig, ax = plt.subplots(figsize= (7,5))
-    df.boxplot()
-    plt.xlabel("pairs")
-    plt.ylabel("$F_{ST}$")
-    ax.set_xticklabels(dfInf['pair1'] + ' - ' + dfInf['pair2'], rotation= 40, ha= 'right', fontsize= 8)
-    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.pdf'])), bbox_inches='tight')
-
-
     plot_fst_per_site(pops_fstVal, pops_fstInf, fname= 'pops')
     plot_fst_per_site(nests_fstVal, nests_fstInf, fname= 'nests')
 
 
 
-def getOutlier(dist):
-    q1 = dist.quantile(0.25)
-    q3 = dist.quantile(0.75)
-    iqr = q3-q1 #Interquartile range
-    #fence_low  = q1-1.5*iqr
-    fence_high = q3+1.5*iqr
-    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
-    out = dist.loc[(dist > fence_high)]
-    return out
-
-def getOutlier_idx(dist):
-    q1 = dist.quantile(0.25)
-    q3 = dist.quantile(0.75)
-    iqr = q3-q1 #Interquartile range
-    #fence_low  = q1-1.5*iqr
-    fence_high = q3+1.5*iqr
-    #dist_in = dist.loc[(dist > fence_low) & (dist <= fence_high)]
-    out = dist > fence_high
-    return out
 
 #pops_fstVal.apply(getOutlier)
 
@@ -800,16 +804,16 @@ df1.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon']
 
 df1.loc[:,'het'] = propHets
 
-df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
+#df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
 
-df2 = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-df2.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
+df.columns = ['elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
 
 
 
 # NOTE: see https://www.reneshbedre.com/blog/principal-component-analysis.html#pca-loadings-plots
 
-df_st =  StandardScaler().fit_transform(df2)
+df_st =  StandardScaler().fit_transform(df)
 
 pca_out = PCA(n_components=10).fit(df_st)
 # Proportion of Variance (from PC1 to PC6)
@@ -824,19 +828,18 @@ loadings = pca_out.components_
 num_pc = pca_out.n_features_
 pc_list = ["PC"+str(i) for i in list(range(1, num_pc+1))]
 loadings_df = pd.DataFrame.from_dict(dict(zip(pc_list, loadings)))
-loadings_df['variable'] = df2.columns.values
+loadings_df['variable'] = df.columns.values
 loadings_df = loadings_df.set_index('variable')
 loadings_df
-
+## NOTE: write to file
 
 # positive and negative values in component loadings reflects the positive and negative
 # correlation of the variables with the PCs (they have a "positive projection" on first PC)
 
 
 # get correlation matrix plot for loadings
-import seaborn as sns
-import matplotlib.pyplot as plt
-ax = sns.heatmap(loadings_df, annot=True, cmap='Spectral')
+sns.heatmap(loadings_df, annot=True, cmap='Spectral')
+plt.tight_layout()
 plt.show()
 
 
@@ -845,15 +848,15 @@ plt.show()
 pca_out.explained_variance_
 # get scree plot (for scree or elbow test)
 from bioinfokit.visuz import cluster
-cluster.screeplot(obj=[pc_list, pca_out.explained_variance_ratio_])
+#cluster.screeplot(obj=[pc_list, pca_out.explained_variance_ratio_])
 
 
 ### or      (rather weird on the y-axis)
-plt.bar(range(1,len(pca_out.explained_variance_ )+1),pca_out.explained_variance_ )
+plt.bar(range(1,len(pca_out.explained_variance_ratio_ )+1),pca_out.explained_variance_ratio_ )
 plt.ylabel('Explained variance')
 plt.xlabel('Components')
-plt.plot(range(1,len(pca_out.explained_variance_ )+1),
-         np.cumsum(pca_out.explained_variance_),
+plt.plot(range(1,len(pca_out.explained_variance_ratio_ )+1),
+         np.cumsum(pca_out.explained_variance_ratio_),
          c='red',
          label="Cumulative Explained Variance")
 plt.legend(loc='upper left')
@@ -861,12 +864,12 @@ plt.legend(loc='upper left')
 # Scree plot will be saved in the same directory with name screeplot.png
 # get PCA loadings plots (2D and 3D)
 # 2D
-cluster.pcaplot(x=loadings[0], y=loadings[1], labels=df2.columns.values,
+cluster.pcaplot(x=loadings[0], y=loadings[1], labels=df.columns.values,
     var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
-    var2=round(pca_out.explained_variance_ratio_[1]*100, 2))
+    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), show= False)
 
 # 3D
-cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df2.columns.values,
+cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df.columns.values,
     var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
     var3=round(pca_out.explained_variance_ratio_[2]*100, 2))
 
@@ -876,11 +879,11 @@ cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df2.columns
 pca_scores = PCA().fit_transform(df_st)
 
 # get 2D biplot
-cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df2.columns.values, var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
+cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values, var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
     var2=round(pca_out.explained_variance_ratio_[1]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot= 'lightgrey')#, colorlist=ids['nest'])
 
 # get 3D biplot
-cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df2.columns.values,
+cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values,
     var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
     var3=round(pca_out.explained_variance_ratio_[2]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot='lightgrey')#, colorlist=ids['nest'])
 
@@ -889,7 +892,7 @@ cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df2.columns.values,
 # show = True
 
 # or    (different 2d biplot)       https://ostwalprasad.github.io/machine-learning/PCA-using-python.html
-def myplot(score,coeff,labels=None):
+def myplot(score,coeff,labels=None, pclabs=[1,2]):
     xs = score[:,0]
     ys = score[:,1]
     n = coeff.shape[0]
@@ -903,11 +906,15 @@ def myplot(score,coeff,labels=None):
         else:
             plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
 
-    plt.xlabel("PC{}".format(1))
-    plt.ylabel("PC{}".format(2))
+    plt.xlabel("PC{}".format(pclabs[0]))
+    plt.ylabel("PC{}".format(pclabs[1]))
     plt.grid()
 
-myplot(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df2.columns))
+myplot(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df.columns), pclabs=[1,2])
+
+myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.columns), pclabs=[2,3])
+
+
 
 
 
@@ -920,6 +927,21 @@ myplot(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df2.colu
 
 print("--- Calculating correlations and plotting heatmaps ---")
 #
+
+sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
+
+# NOTE: get factors as integers
+df2 = ids[['nest', 'pop', 'elevation', 'started_aggression', 'reacted_aggressively', 'reacted_peacefully', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
+df2.columns = ['nest', 'pop', 'elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon']
+
+df2.loc[:,'het'] = propHets
+
+#df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
+
+df3 = pd.concat([df2, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
+df3.columns = ['nest', 'pop', 'elev', 'startA', 'reactA', 'reactP', 'MMAI', 'AI', 'lat', 'lon', 'het', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+
+
 #
 #fig = plt.figure(figsize=(14,6))
 #ax = fig.add_subplot(1,2,1)
