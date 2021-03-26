@@ -541,6 +541,8 @@ if __name__ == "__main__":
 
     #############   PCA gtvars  #############
 
+    # (in vars/ta{vartype}/{stats,figs}/al/pca/)
+
     print("-----------  LD pruning, calculating PCAs and plotting figures  -----------")
 
     plot_ld(nAltVars[:1000], 'Pairwise LD after random downsampling', 'ld_1000.png')
@@ -559,7 +561,7 @@ if __name__ == "__main__":
 
     segScafs = variants['variants/CHROM'][:][segAll_vars]
     segBP = variants['variants/POS'][:][segAll_vars]
-    segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
+    segVars = pd.DataFrame({'scaf': segScafs, 'bp': segBP})
 
 
     # LD pruning
@@ -567,6 +569,7 @@ if __name__ == "__main__":
 
     gnuVars, vars_ldPrd = ld_prune(nAltVars, segVars, size=50, step=20, threshold=.1, n_iter=4)
 
+    vars_ldPrd.to_csv(os.path.join(pcasP, 'ld_prunedVars.scafbp.txt'), header= False, index= False, sep= '\t')
 
     plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filename= 'ld_prune.png')
 
