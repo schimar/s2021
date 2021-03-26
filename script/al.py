@@ -21,6 +21,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import seaborn as sns
 sns.set_style('whitegrid')
+
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
 #sns.set_style('ticks')
 #sns.set_context('notebook')
 # --------------
@@ -493,9 +497,49 @@ if __name__ == "__main__":
 
     g.savefig(os.path.join(figsP, 'pwDist.png'), bbox_inches='tight')
 
-    # ---------------------------------------------------------------------
 
-    #############   PCA   #############
+
+    # ------------------------------------
+
+
+
+    #############   selective sweeps    #############
+
+    print("--- Calculating and plotting Garud's H statistics ---")
+
+            #  Garud's H (signatures of (soft vs hard) selective sweeps) (see Garud (2015) Recent Selective Sweeps in North American Drosophila melanogaster Show Signatures of Soft Sweeps)
+    # (written to vars/ta{vartype}/{stats,figs}/al/sel/)
+
+
+    # NOTE: for now, I've only written Garud's H stats and figs for the full sample size per pop (downsamp in garud_h_per_pop func)
+
+
+    garud_h_per_pop(gtseg_vars, pops).to_csv(os.path.join(selsP, 'pops.garud_h.txt'), header= True, index= True, sep= '\t')
+
+    garud_h_per_pop(gtseg_vars, nests).to_csv(os.path.join(selsP, 'nests.garud_h.txt'), header= True, index= True, sep= '\t')
+
+
+
+    fig = plt.figure(figsize=(6, 5))
+    ax = sns.heatmap(garud_h_per_pop(gtseg_vars, pops), cmap='coolwarm', annot= True)
+    ax.set_title("Garud's H statistics - pops")
+    fig.tight_layout()
+    fig.savefig(os.path.join(selfP, 'pops.garud_h.png'), bbox_inches='tight')
+    #fig.suptitle(title, y=1.02)
+
+    fig = plt.figure(figsize=(10, 5))
+    ax = sns.heatmap(garud_h_per_pop(gtseg_vars, nests), cmap='coolwarm', annot= True)
+    ax.set_title("Garud's H statistics - nests")
+    fig.tight_layout()
+    fig.savefig(os.path.join(selfP, 'nests.garud_h.png'), bbox_inches='tight')
+
+
+
+
+
+
+
+    #############   PCA gtvars  #############
 
     print("-----------  LD pruning, calculating PCAs and plotting figures  -----------")
 
@@ -761,9 +805,8 @@ if __name__ == "__main__":
 
 
 
-    # -------------------------------------------------------- #
+    #############   Fst   #############
 
-    # Fst
 
     print("---  Calculating Weir & Cockerham's Fst with std.err from block-jackknife  ---")
 
@@ -816,9 +859,10 @@ if __name__ == "__main__":
 #scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
 
 
-# index loci
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+
+    #############   PCA over variables (ids, PCs of gtvars and more)   #############
+
+
 
 
 df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
@@ -946,18 +990,44 @@ myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.colum
 
 
 # -----------------------------------------------------
-#pd.DataFrame(df_st, columns=df.columns).head(2)
 
 #idx = al.UniqueIndex(np.arange(0, len(scafbp)))
 
 #scafbp[getScafBp(idx, is_seg)]
 
-print("--- Calculating correlations and plotting heatmaps ---")
+
+
+    #############   correlations for all variables   #############
+
+
+    print("--- Calculating correlations and plotting heatmaps ---")
+
+    sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
+
+
+
+
+
+    #############   Haplotype diversity   #############
+
+
+# --------------------------------------------------------------
+# NOTE: haplo div is 1, what does it mean?
+#def haplo_div(gtvars, pops):
+#    resDict = {}
+#    for pop in pops:
+#        ht = gtvars.subset(sel1=pops[pop]).to_haplotypes()
+#        resDict[pop] = al.haplotype_diversity(ht)
+#    return resDict
 #
+#haplo_div(gtvars, pops)
 
-sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
 
 
+
+
+
+##########  misc  #########
 
 #
 #fig = plt.figure(figsize=(14,6))
@@ -981,39 +1051,5 @@ sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
 #sns.heatmap(xSeg.cov(), cmap= 'coolwarm', annot= True)
 #ax.set_title('covariance with PCs of segregating loci (1,319,775)')
 #plt.tight_layout()
-# NOTE: for now, I've only written Garud's H stats and figs for the full sample size per pop (downsamp in garud_h_per_pop func)
 
-
-    garud_h_per_pop(gtseg_vars, pops).to_csv(os.path.join(selsP, 'pops.garud_h.txt'), header= True, index= True, sep= '\t')
-
-    garud_h_per_pop(gtseg_vars, nests).to_csv(os.path.join(selsP, 'nests.garud_h.txt'), header= True, index= True, sep= '\t')
-
-
-
-
-fig = plt.figure(figsize=(6, 5))
-ax = sns.heatmap(garud_h_per_pop(gtseg_vars, pops), cmap='coolwarm', annot= True)
-ax.set_title("Garud's H statistics - pops")
-fig.tight_layout()
-fig.savefig(os.path.join(selfP, 'pops.garud_h.png'), bbox_inches='tight')
-#fig.suptitle(title, y=1.02)
-
-fig = plt.figure(figsize=(10, 5))
-ax = sns.heatmap(garud_h_per_pop(gtseg_vars, nests), cmap='coolwarm', annot= True)
-ax.set_title("Garud's H statistics - nests")
-fig.tight_layout()
-fig.savefig(os.path.join(selfP, 'nests.garud_h.png'), bbox_inches='tight')
-
-
-
-# --------------------------------------------------------------
-# NOTE: haplo div is 1, what does it mean?
-#def haplo_div(gtvars, pops):
-#    resDict = {}
-#    for pop in pops:
-#        ht = gtvars.subset(sel1=pops[pop]).to_haplotypes()
-#        resDict[pop] = al.haplotype_diversity(ht)
-#    return resDict
-#
-#haplo_div(gtvars, pops)
 
