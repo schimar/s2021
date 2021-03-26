@@ -213,7 +213,7 @@ def plot_bjFst(df, fname):
     plt.xlabel('pairs')
     plt.ylabel("$F_{ST}$")
     ax.set_xticklabels(df['pair1'] + ' - ' + df['pair2'], rotation= 40, ha= 'right', fontsize= 8)
-    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'bjFst_bar.pdf'])), bbox_inches='tight')
+    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'bjFst_bar.png'])), bbox_inches='tight')
 
 
 
@@ -270,7 +270,7 @@ def plot_fst_per_site(df, dfInf, fname):
     plt.xlabel("pairs")
     plt.ylabel("$F_{ST}$")
     ax.set_xticklabels(dfInf['pair1'] + ' - ' + dfInf['pair2'], rotation= 40, ha= 'right', fontsize= 8)
-    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.pdf'])), bbox_inches='tight')
+    fig.savefig(os.path.join(fstfP, '.'.join([fname, 'wcFst_perSite_box.png'])), bbox_inches='tight')
 
 
 def plot_fsfs(gtvars, pops, fname, cols, subsample=True):
@@ -296,6 +296,20 @@ def plot_fsfs(gtvars, pops, fname, cols, subsample=True):
         else:
             ax.set_title('Folded site frequency spectra (uneven N inds)')
         fig.savefig(os.path.join(sfsP, '.'.join([fname, 'png' ])), bbox_inches='tight')
+
+
+def garud_h_per_pop(gtvars, pops, downsamp= False):
+    resDict = {}
+    nds = min([ len(v) for k, v in pops.items() ])
+    for pop in pops:
+        if downsamp:
+            ds = random.sample(pops[pop], nds)
+            ht = gtvars.subset(sel0=ds, sel1=pops[pop]).to_haplotypes()
+        else:
+            ht = gtvars.subset(sel1=pops[pop]).to_haplotypes()
+        h = al.garud_h(ht)
+        resDict[pop] = h
+    return pd.DataFrame(resDict, index= ('h1', 'h12', 'h123', 'h2_h1'))
 
 
 def getOutlier(dist):
@@ -349,10 +363,11 @@ if __name__ == "__main__":
     fstsPnests = os.path.join(zarrname, 'stats/al/fst/nests/')
     fstsPpops = os.path.join(zarrname, 'stats/al/fst/pops/')
     gemmasP = os.path.join(zarrname, 'stats/gemma/')
+    selsP = os.path.join(zarrname, 'stats/al/sel/')
+    selfP = os.path.join(zarrname, 'figs/al/sel/')
 
 
-
-    folderList = [statsP, figsP, pcasP, pcafP, varpcafP, varpcasP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, gemmasP]
+    folderList = [statsP, figsP, pcasP, pcafP, varpcafP, varpcasP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, selsP, selfP, gemmasP]
     for folder in folderList:
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -966,10 +981,39 @@ sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
 #sns.heatmap(xSeg.cov(), cmap= 'coolwarm', annot= True)
 #ax.set_title('covariance with PCs of segregating loci (1,319,775)')
 #plt.tight_layout()
+# NOTE: for now, I've only written Garud's H stats and figs for the full sample size per pop (downsamp in garud_h_per_pop func)
+
+
+    garud_h_per_pop(gtseg_vars, pops).to_csv(os.path.join(selsP, 'pops.garud_h.txt'), header= True, index= True, sep= '\t')
+
+    garud_h_per_pop(gtseg_vars, nests).to_csv(os.path.join(selsP, 'nests.garud_h.txt'), header= True, index= True, sep= '\t')
 
 
 
-#plt.errorbar( df['Model'], df['Mean'], yerr=df['SD'], fmt='o', color='Black', elinewidth=3,capthick=3,errorevery=1, alpha=1, ms=4, capsize = 5)
-#plt.bar(df['Model'], df['Mean'],tick_label = df['Model'])##Bar plot
-#plt.xlabel('Model') ## Label on X axis
-#plt.ylabel('Average Performance') ##Label on Y axis
+
+fig = plt.figure(figsize=(6, 5))
+ax = sns.heatmap(garud_h_per_pop(gtseg_vars, pops), cmap='coolwarm', annot= True)
+ax.set_title("Garud's H statistics - pops")
+fig.tight_layout()
+fig.savefig(os.path.join(selfP, 'pops.garud_h.png'), bbox_inches='tight')
+#fig.suptitle(title, y=1.02)
+
+fig = plt.figure(figsize=(10, 5))
+ax = sns.heatmap(garud_h_per_pop(gtseg_vars, nests), cmap='coolwarm', annot= True)
+ax.set_title("Garud's H statistics - nests")
+fig.tight_layout()
+fig.savefig(os.path.join(selfP, 'nests.garud_h.png'), bbox_inches='tight')
+
+
+
+# --------------------------------------------------------------
+# NOTE: haplo div is 1, what does it mean?
+#def haplo_div(gtvars, pops):
+#    resDict = {}
+#    for pop in pops:
+#        ht = gtvars.subset(sel1=pops[pop]).to_haplotypes()
+#        resDict[pop] = al.haplotype_diversity(ht)
+#    return resDict
+#
+#haplo_div(gtvars, pops)
+
