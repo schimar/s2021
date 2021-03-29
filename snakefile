@@ -28,6 +28,7 @@ rule all:
 	    'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat',
 	    'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
         'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
+	    'vars/taSubInDelBypop.vcf',
 
 
 

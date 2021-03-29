@@ -84,4 +84,17 @@ rule get_vartype:
     """
 
 
+rule sub_vcf_scafbp:
+  input:
+    vcf = 'vars/taSubInDelBypop.vcf',
+    scafbp = 'vars/taSubInDel/stats/gemma/vars_seg.gemma.scafbp'
+  output:
+    vcf = 'vars/taSubInDel.ldp.vcf'
+  message:
+    """--- Taking subset of LD-pruned variants ---"""
+  shell:
+    """
+    script/sub_vcf_scafbp.py {input.vcf} {input.scafbp} > {output.vcf}
+    """
+
 
