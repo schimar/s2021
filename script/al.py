@@ -1026,6 +1026,31 @@ myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.colum
 #haplo_div(gtvars, pops)
 
 
+    #############   dxy (sequence_divergence)   #############
+def get_scafs_iter:
+
+
+    ac =
+for i, s in enumerate(np.unique(scaf)):
+    isScaf = scaf == s
+    tmp = gtvars.compress(isScaf, axis = 0)
+    actmp = tmp.count_alleles_subpops(
+    print(tmp.shape)
+
+
+ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
+    segAll_vars = ac_pops_vars['all'].is_segregating()[:]
+    gtseg_vars = gtvars.compress(segAll_vars, axis=0)
+    nAltVars = gtseg_vars.to_n_alt()
+
+    # take subset of vars on scaf s
+    # get allele counts for pop pairs
+    # calc sequence_divergence (windowed?) for the two allele counts
+
+
+gtvars.subset(sel0=sel1=pops['S'])
+
+
 
 
 
