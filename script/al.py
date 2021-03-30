@@ -316,6 +316,28 @@ def garud_h_per_pop(gtvars, pops, downsamp= False):
     return pd.DataFrame(resDict, index= ('h1', 'h12', 'h123', 'h2_h1'))
 
 
+def biplot2d(score,coeff,labels=None, pclabs=[1,2]):
+    xs = score[:,0]
+    ys = score[:,1]
+    n = coeff.shape[0]
+    scalex = 1.0/(xs.max() - xs.min())
+    scaley = 1.0/(ys.max() - ys.min())
+    fig = plt.figure(figsize=(12,8))
+    plt.scatter(xs * scalex,ys * scaley,s=5)
+    for i in range(n):
+        plt.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
+        if labels is None:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color = 'green', ha = 'center', va = 'center')
+        else:
+            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
+
+    plt.xlabel("PC{}".format(pclabs[0]))
+    plt.ylabel("PC{}".format(pclabs[1]))
+    plt.grid()
+    plt.tight_layout()
+    plt.savefig(os.path.join(varpcafP,'.'.join(['biplot_pc', str(pclabs[0]), str(pclabs[1]), 'png'])), bbox_inches='tight')
+
+
 def getOutlier(dist):
     q1 = dist.quantile(0.25)
     q3 = dist.quantile(0.75)
@@ -667,9 +689,9 @@ if __name__ == "__main__":
 
 
     # write first 4 eigen values to file:
-    pd.DataFrame([ x[:4] for x in coords1var ]).to_csv(os.path.join(pcasP, "vars_LDprune.eigen"), sep= ' ', index= False, header= False)
+    pd.DataFrame([ x[:4] for x in coords1var ]).to_csv(os.path.join(pcasP, "vars_LDprune.loadings.txt"), sep= ' ', index= False, header= False)
 
-    pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars_all.eigen"), sep= ' ', index= False, header= False)
+    pd.DataFrame([ x[:4] for x in coords2allVars ]).to_csv(os.path.join(pcasP, "vars_all.loadings.txt"), sep= ' ', index= False, header= False)
 
     # write general shape info to file
     pd.Series([ gtvars.shape[0], gtseg_vars.shape[0], dvar.shape[0], gnuVars.shape[0] ], index= ['all', 'seg. alleles', 'pwDist shape', 'LD-pruned vars']).to_csv(os.path.join(statsP, "nVars.txt"), sep='\t', index= True, header= False)
@@ -773,13 +795,6 @@ if __name__ == "__main__":
 
 
 
-
-
-
-
-    ############
-    # ac_nests_vars
-    #ac_seg = ac_subpops['all'].compress(segAll)
     #
     ##########################
 
@@ -854,13 +869,6 @@ if __name__ == "__main__":
 
 
 
-#pops_fstVal.apply(getOutlier)
-
-#pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
-
-## now returning the boolean for easier indexing
-#scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
-
 
 
     #############   PCA over variables (ids, PCs of gtvars and more)   #############
@@ -868,125 +876,116 @@ if __name__ == "__main__":
 
 
 
-df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
-df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon']
+    df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
+    df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon']
 
-df1.loc[:,'het'] = propHets
-df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
-df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
+    df1.loc[:,'het'] = propHets
+    df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
+    df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
+    df1.loc[:, 'gyn'] = 0
+    df1['gyn'][df1['pop'] == 2] = 1
 
 
-
-
-#df1[['pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp']] = coords1var[:,:4]
-
-df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'het', 'nest', 'pop', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+    df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
+    df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'het', 'nest', 'pop', 'gyn', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
 
 
 
-# NOTE: see https://www.reneshbedre.com/blog/principal-component-analysis.html#pca-loadings-plots
+    df_st =  StandardScaler().fit_transform(df)
 
-df_st =  StandardScaler().fit_transform(df)
+    pca_out = PCA(n_components=10).fit(df_st)
+    # Proportion of Variance (from PC1 to PC6)
+    pca_out.explained_variance_ratio_
 
-pca_out = PCA(n_components=10).fit(df_st)
-# Proportion of Variance (from PC1 to PC6)
-pca_out.explained_variance_ratio_
+    # Cumulative proportion of variance (from PC1 to PC6)
+    np.cumsum(pca_out.explained_variance_ratio_)
 
-# Cumulative proportion of variance (from PC1 to PC6)
-np.cumsum(pca_out.explained_variance_ratio_)
+    # component loadings (correlation coefficient between original variables and the component)
+    # the squared loadings within the PCs always sums to 1
+    loadings = pca_out.components_
+    num_pc = pca_out.n_features_
+    pc_list = ["PC"+str(i) for i in list(range(1, num_pc+1))]
+    loadings_df = pd.DataFrame.from_dict(dict(zip(pc_list, loadings)))
+    loadings_df['variable'] = df.columns.values
+    loadings_df = loadings_df.set_index('variable')
+    loadings_df.to_csv(os.path.join(varpcasP, 'varPca.loadings.txt'), header= True, index= False, sep= '\t')
+    ## NOTE: write to file
 
-# component loadings (correlation coefficient between original variables and the component)
-# the squared loadings within the PCs always sums to 1
-loadings = pca_out.components_
-num_pc = pca_out.n_features_
-pc_list = ["PC"+str(i) for i in list(range(1, num_pc+1))]
-loadings_df = pd.DataFrame.from_dict(dict(zip(pc_list, loadings)))
-loadings_df['variable'] = df.columns.values
-loadings_df = loadings_df.set_index('variable')
-loadings_df
-## NOTE: write to file
-
-# positive and negative values in component loadings reflects the positive and negative
-# correlation of the variables with the PCs (they have a "positive projection" on first PC)
+    # positive and negative values in component loadings reflects the positive and negative
+    # correlation of the variables with the PCs (they have a "positive projection" on first PC)
 
 
-# get correlation matrix plot for loadings
-sns.heatmap(loadings_df, annot=True, cmap='Spectral')
-plt.tight_layout()
-plt.show()
+    # get correlation matrix plot for loadings
+    fig = plt.figure(figsize=(14,12))
+    sns.heatmap(loadings_df, annot=True, cmap='Spectral')
+    plt.tight_layout()
+    plt.savefig(os.path.join(varpcafP,'corrMat_loadPCA.png'), bbox_inches='tight')
+
+    #plt.show()
+
+
+    # screeplot with cumsum variance
+    plt.bar(range(1,len(pca_out.explained_variance_ratio_ )+1),pca_out.explained_variance_ratio_ )
+    plt.ylabel('Explained variance')
+    plt.xlabel('Components')
+    plt.plot(range(1,len(pca_out.explained_variance_ratio_ )+1),
+             np.cumsum(pca_out.explained_variance_ratio_),
+             c='red',
+             label="Cumulative Explained Variance")
+    plt.legend(loc='upper left')
+    plt.savefig(os.path.join(varpcafP,'scree_cumsumVar.png'), bbox_inches='tight')
+
+
+    # get PC scores
+    pca_scores = PCA().fit_transform(df_st)
+
+
+    # 2d biplot       https://ostwalprasad.github.io/machine-learning/PCA-using-python.html
+    biplot2d(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df.columns), pclabs=[1,2])
+
+    biplot2d(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.columns), pclabs=[2,3])
+
+    # NOTE: see https://www.reneshbedre.com/blog/principal-component-analysis.html#pca-loadings-plots
+    # get eigenvalues (from PC1 to PC6)
+    #pca_out.explained_variance_
+
+    # get scree plot (for scree or elbow test)
+    #from bioinfokit.visuz import cluster
+    #cluster.screeplot(obj=[pc_list, pca_out.explained_variance_ratio_])
+
+    # Scree plot will be saved in the same directory with name screeplot.png
+    # get PCA loadings plots (2D and 3D)
+    # 2D
+    #cluster.pcaplot(x=loadings[0], y=loadings[1], labels=df.columns.values,
+    #    var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
+    #    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), show= False)
+    #
+    ## 3D
+    #cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df.columns.values,
+    #    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
+    #    var3=round(pca_out.explained_variance_ratio_[2]*100, 2))
+
+    # get 2D biplot
+    #cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values, var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
+    #    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot= 'lightgrey')#, colorlist=ids['nest'])
+    #
+    ## get 3D biplot
+    #cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values,
+    #    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
+    #    var3=round(pca_out.explained_variance_ratio_[2]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot='lightgrey')#, colorlist=ids['nest'])
 
 
 
-# get eigenvalues (from PC1 to PC6)
-pca_out.explained_variance_
-# get scree plot (for scree or elbow test)
-from bioinfokit.visuz import cluster
-#cluster.screeplot(obj=[pc_list, pca_out.explained_variance_ratio_])
 
 
-### or      (rather weird on the y-axis)
-plt.bar(range(1,len(pca_out.explained_variance_ratio_ )+1),pca_out.explained_variance_ratio_ )
-plt.ylabel('Explained variance')
-plt.xlabel('Components')
-plt.plot(range(1,len(pca_out.explained_variance_ratio_ )+1),
-         np.cumsum(pca_out.explained_variance_ratio_),
-         c='red',
-         label="Cumulative Explained Variance")
-plt.legend(loc='upper left')
-
-# Scree plot will be saved in the same directory with name screeplot.png
-# get PCA loadings plots (2D and 3D)
-# 2D
-cluster.pcaplot(x=loadings[0], y=loadings[1], labels=df.columns.values,
-    var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
-    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), show= False)
-
-# 3D
-cluster.pcaplot(x=loadings[0], y=loadings[1], z=loadings[2],  labels=df.columns.values,
-    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
-    var3=round(pca_out.explained_variance_ratio_[2]*100, 2))
+    #############   correlations for all variables   #############
 
 
+    print("--- Calculating correlations and plotting heatmaps ---")
 
-# get PC scores
-pca_scores = PCA().fit_transform(df_st)
-
-# get 2D biplot
-cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values, var1=round(pca_out.explained_variance_ratio_[0]*100, 2),
-    var2=round(pca_out.explained_variance_ratio_[1]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot= 'lightgrey')#, colorlist=ids['nest'])
-
-# get 3D biplot
-cluster.biplot(cscore=pca_scores, loadings=loadings, labels=df.columns.values,
-    var1=round(pca_out.explained_variance_ratio_[0]*100, 2), var2=round(pca_out.explained_variance_ratio_[1]*100, 2),
-    var3=round(pca_out.explained_variance_ratio_[2]*100, 2), valphadot=0.4, dotsize= 3, datapoints=True, colordot='lightgrey')#, colorlist=ids['nest'])
-
-# datapoints= False
-
-# show = True
-
-# or    (different 2d biplot)       https://ostwalprasad.github.io/machine-learning/PCA-using-python.html
-def myplot(score,coeff,labels=None, pclabs=[1,2]):
-    xs = score[:,0]
-    ys = score[:,1]
-    n = coeff.shape[0]
-    scalex = 1.0/(xs.max() - xs.min())
-    scaley = 1.0/(ys.max() - ys.min())
-    plt.scatter(xs * scalex,ys * scaley,s=5)
-    for i in range(n):
-        plt.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
-        if labels is None:
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color = 'green', ha = 'center', va = 'center')
-        else:
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
-
-    plt.xlabel("PC{}".format(pclabs[0]))
-    plt.ylabel("PC{}".format(pclabs[1]))
-    plt.grid()
-
-myplot(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df.columns), pclabs=[1,2])
-
-myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.columns), pclabs=[2,3])
+    sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
+    plt.tight_layout()
+    plt.savefig(os.path.join(varpcafP,'df_corr_heat.png'), bbox_inches='tight')
 
 
 
@@ -999,15 +998,12 @@ myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.colum
 #scafbp[getScafBp(idx, is_seg)]
 
 
+#pops_fstVal.apply(getOutlier)
 
-    #############   correlations for all variables   #############
+#pops_fstVal.apply(getOutlier).describe()    # number of outliers, etc.
 
-
-    print("--- Calculating correlations and plotting heatmaps ---")
-
-    sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
-
-
+## now returning the boolean for easier indexing
+#scafbp[pops_is_seg['A_S']][getOutlier_idx(pops_pwFstScafBp['A_S']['wcFst'])]
 
 
 
@@ -1027,28 +1023,28 @@ myplot(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.colum
 
 
     #############   dxy (sequence_divergence)   #############
-def get_scafs_iter:
-
-
-    ac =
-for i, s in enumerate(np.unique(scaf)):
-    isScaf = scaf == s
-    tmp = gtvars.compress(isScaf, axis = 0)
-    actmp = tmp.count_alleles_subpops(
-    print(tmp.shape)
-
-
-ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
-    segAll_vars = ac_pops_vars['all'].is_segregating()[:]
-    gtseg_vars = gtvars.compress(segAll_vars, axis=0)
-    nAltVars = gtseg_vars.to_n_alt()
-
-    # take subset of vars on scaf s
-    # get allele counts for pop pairs
-    # calc sequence_divergence (windowed?) for the two allele counts
-
-
-gtvars.subset(sel0=sel1=pops['S'])
+#    def get_scafs_iter:
+#
+#
+#        ac =
+#    for i, s in enumerate(np.unique(scaf)):
+#        isScaf = scaf == s
+#        tmp = gtvars.compress(isScaf, axis = 0)
+#        actmp = tmp.count_alleles_subpops(
+#        print(tmp.shape)
+#
+#
+#    ac_pops_vars = gtvars.count_alleles_subpops(pops, max_allele=1)
+#        segAll_vars = ac_pops_vars['all'].is_segregating()[:]
+#        gtseg_vars = gtvars.compress(segAll_vars, axis=0)
+#        nAltVars = gtseg_vars.to_n_alt()
+#
+#        # take subset of vars on scaf s
+#        # get allele counts for pop pairs
+#        # calc sequence_divergence (windowed?) for the two allele counts
+#
+#
+#    gtvars.subset(sel0=sel1=pops['S'])
 
 
 
