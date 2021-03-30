@@ -920,7 +920,7 @@ if __name__ == "__main__":
     sns.heatmap(loadings_df, annot=True, cmap='Spectral')
     plt.tight_layout()
     fig.savefig(os.path.join(varpcafP,'corrMat_loadPCA.png'), bbox_inches='tight')
-
+    fig.clear()
 
 
     # screeplot with cumsum variance
@@ -934,7 +934,7 @@ if __name__ == "__main__":
              label="Cumulative Explained Variance")
     plt.legend(loc='upper left')
     fig.savefig(os.path.join(varpcafP,'scree_cumsumVar.png'), bbox_inches='tight')
-
+    fig.clear()
 
     # get PC scores
     pca_scores = PCA().fit_transform(df_st)
