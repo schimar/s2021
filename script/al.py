@@ -335,7 +335,7 @@ def biplot2d(score,coeff,labels=None, pclabs=[1,2]):
     plt.ylabel("PC{}".format(pclabs[1]))
     plt.grid()
     plt.tight_layout()
-    plt.savefig(os.path.join(varpcafP,'.'.join(['biplot_pc', str(pclabs[0]), str(pclabs[1]), 'png'])), bbox_inches='tight')
+    fig.savefig(os.path.join(varpcafP,'.'.join(['biplot_pc', str(pclabs[0]), str(pclabs[1]), 'png'])), bbox_inches='tight')
 
 
 def getOutlier(dist):
@@ -919,12 +919,12 @@ if __name__ == "__main__":
     fig = plt.figure(figsize=(14,12))
     sns.heatmap(loadings_df, annot=True, cmap='Spectral')
     plt.tight_layout()
-    plt.savefig(os.path.join(varpcafP,'corrMat_loadPCA.png'), bbox_inches='tight')
+    fig.savefig(os.path.join(varpcafP,'corrMat_loadPCA.png'), bbox_inches='tight')
 
-    #plt.show()
 
 
     # screeplot with cumsum variance
+    fig = plt.figure(figsize=(12,8))
     plt.bar(range(1,len(pca_out.explained_variance_ratio_ )+1),pca_out.explained_variance_ratio_ )
     plt.ylabel('Explained variance')
     plt.xlabel('Components')
@@ -933,7 +933,7 @@ if __name__ == "__main__":
              c='red',
              label="Cumulative Explained Variance")
     plt.legend(loc='upper left')
-    plt.savefig(os.path.join(varpcafP,'scree_cumsumVar.png'), bbox_inches='tight')
+    fig.savefig(os.path.join(varpcafP,'scree_cumsumVar.png'), bbox_inches='tight')
 
 
     # get PC scores
