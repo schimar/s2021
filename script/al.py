@@ -391,9 +391,10 @@ if __name__ == "__main__":
     gemmasP = os.path.join(zarrname, 'stats/gemma/')
     selsP = os.path.join(zarrname, 'stats/al/sel/')
     selfP = os.path.join(zarrname, 'figs/al/sel/')
+    vcftlsP = os.path.join(zarrname, 'stats/vcftools')
 
 
-    folderList = [statsP, figsP, pcasP, pcafP, varpcafP, varpcasP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, selsP, selfP, gemmasP]
+    folderList = [statsP, figsP, pcasP, pcafP, varpcafP, varpcasP, varDenseP, hetfP, sfsP, fstsPnests, fstsPpops, fstfP, selsP, selfP, gemmasP, vcftlsP]
     for folder in folderList:
         if not os.path.exists(folder):
             os.makedirs(folder)

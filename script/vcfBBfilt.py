@@ -24,11 +24,12 @@ typls = literal_eval(argv[2])
 
 with open(argv[1], 'rb') as file:
     for line in file:
+        line = bytes.decode(line).strip('\n')
         if line[0] == '#':
             #continue
-            print line.strip('\n')
+            print(line)
         else:
-            lspl = line.strip('\n').split('\t')
+            lspl = line.split('\t')
             test = lspl[6]
             altAll = lspl[4]
             if test == 'PASS':
@@ -42,7 +43,7 @@ with open(argv[1], 'rb') as file:
                 ppc = int(re.findall('PPC=[0-9]+', line)[0].split('=')[1])
                 #
                 if (raf not in fixed and dp >= minCoverage and typ in typls and mqs >= mapQual and ac >= minAltRds):
-                    print line.strip('\n')
+                    print(line.strip('\n'))
 
     file.close()
 
