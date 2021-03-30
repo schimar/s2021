@@ -984,6 +984,7 @@ if __name__ == "__main__":
     print("--- Calculating correlations and plotting heatmaps ---")
 
     fig.clear()
+    fig = plt.figure(figsize=(14,12))
     sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
     plt.tight_layout()
     plt.savefig(os.path.join(varpcafP,'df_corr_heat.png'), bbox_inches='tight')
