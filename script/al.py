@@ -316,24 +316,26 @@ def garud_h_per_pop(gtvars, pops, downsamp= False):
     return pd.DataFrame(resDict, index= ('h1', 'h12', 'h123', 'h2_h1'))
 
 
-def biplot2d(score,coeff,labels=None, pclabs=[1,2]):
+def biplot2d(score,coeff,labels=None, pclabs=[1,2], ylim= [-0.45, 0.7]):
     xs = score[:,0]
     ys = score[:,1]
     n = coeff.shape[0]
     scalex = 1.0/(xs.max() - xs.min())
     scaley = 1.0/(ys.max() - ys.min())
-    fig = plt.figure(figsize=(12,8))
-    plt.scatter(xs * scalex,ys * scaley,s=5)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    yli = np.concatenate((score[:,1], coeff[:,1]))
+    ax.set_ylim(ylim)
+    #print([min(ys * scaley), max(ys*scaley)])
+    ax.scatter(xs * scalex,ys * scaley,s=5)
     for i in range(n):
-        plt.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
+        ax.arrow(0, 0, coeff[i,0], coeff[i,1],color = 'r',alpha = 0.5)
         if labels is None:
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color = 'green', ha = 'center', va = 'center')
+            ax.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, "Var"+str(i+1), color = 'green', ha = 'center', va = 'center')
         else:
-            plt.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
-
-    plt.xlabel("PC{}".format(pclabs[0]))
-    plt.ylabel("PC{}".format(pclabs[1]))
-    plt.grid()
+            ax.text(coeff[i,0]* 1.15, coeff[i,1] * 1.15, labels[i], color = 'g', ha = 'center', va = 'center')
+    ax.set_xlabel("PC{}".format(pclabs[0]))
+    ax.set_ylabel("PC{}".format(pclabs[1]))
+    ax.grid()
     plt.tight_layout()
     fig.savefig(os.path.join(varpcafP,'.'.join(['biplot_pc', str(pclabs[0]), str(pclabs[1]), 'png'])), bbox_inches='tight')
 
@@ -479,6 +481,8 @@ if __name__ == "__main__":
     gtseg_is_het.to_csv(os.path.join(statsP, 'nSegHets.txt'), header=True, index=True, sep= '\t')
 
     ac_nests_vars = gtvars.count_alleles_subpops(nests, max_allele=1)
+
+    propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
 
     # write pheno file (for gemma)
     phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
@@ -944,7 +948,7 @@ if __name__ == "__main__":
     # 2d biplot       https://ostwalprasad.github.io/machine-learning/PCA-using-python.html
     biplot2d(pca_scores[:,0:2],np.transpose(pca_out.components_[0:2, :]),list(df.columns), pclabs=[1,2])
 
-    biplot2d(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.columns), pclabs=[2,3])
+    biplot2d(pca_scores[:,2:4],np.transpose(pca_out.components_[2:4, :]),list(df.columns), pclabs=[2,3], ylim= [-0.6, 0.8])
 
     # NOTE: see https://www.reneshbedre.com/blog/principal-component-analysis.html#pca-loadings-plots
     # get eigenvalues (from PC1 to PC6)
