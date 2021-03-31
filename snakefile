@@ -29,6 +29,9 @@ rule all:
 	    #'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat',
 	    #'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
         #'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
+	    expand('vars/ta{type}/figs/vcftools/plots.done', type=['SubInDel', 'InDel', 'Sub']),
+
+
 
 
 
