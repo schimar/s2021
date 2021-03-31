@@ -484,9 +484,7 @@ if __name__ == "__main__":
 
     propHets = pd.Series(gtvars.count_het(axis= 0)/len(gtvars))
 
-    # write pheno file (for gemma)
-    phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
-    phenos.to_csv(os.path.join(gemmasP, '.'.join([ varname, 'pheno' ])), sep= ' ', index= False, header= False)
+
 
 
     # nSeg per pop/nest as DataFrame:
@@ -894,7 +892,10 @@ if __name__ == "__main__":
     df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
     df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'het', 'nest', 'pop', 'gyn', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
 
-
+    # write pheno file (for gemma)
+    #phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
+    phenos = df[['agg', 'gyn']]
+    phenos.to_csv(os.path.join(gemmasP, '.'.join([ varname, 'pheno' ])), sep= ' ', index= False, header= False)
 
     df_st =  StandardScaler().fit_transform(df)
 

@@ -24,11 +24,11 @@ rule all:
 	    expand('vars/ta{type}/stats/vcftools/king.done', type=['SubInDel', 'InDel', 'Sub']),
 	    #expand('vars/ta{vartype}/stats/gemma/vars_seg.gemma.scafbp', vartype=['SubInDel', 'InDel', 'Sub']), ### output for rule alStats and input for rule gemma
 	    ##expand('vars/ta{vartype}/stats/gemma/ta{vartype}.mg', vartype=['SubInDel', 'InDel', 'Sub']),
-	    #'vars/taSubInDel/stats/gemma/taSubInDel.mg',
+	    'vars/taSubInDel/stats/gemma/taSubInDel.mg',
 	    #expand('vars/ta{vartype}/stats/gemma/ta{vartype}.pheno', vartype=['SubInDel', 'InDel', 'Sub']),
-	    #'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat',
-	    #'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
-        #'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
+	    'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat',
+	    'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
+        'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
 	    expand('vars/ta{type}/figs/vcftools/plots.done', type=['SubInDel', 'InDel', 'Sub']),
 
 
