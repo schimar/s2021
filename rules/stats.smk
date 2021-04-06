@@ -62,13 +62,16 @@ rule gemma_relmat_ctrd:
     #mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg',
     #pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
   output:
-    relM = 'vars/taSubInDel/stats/gemma/taSubInDel.ctrd.relmat'
-    #relM = 'vars/ta{vartype}/stats/gemma/ta{vartype}.ctrd.relmat'
+    touch('vars/taSubInDel/stats/gemma/relmat/ctrd.done'),
+    relM = 'taSubInDel'
+        #relM = 'vars/ta{vartype}/stats/gemma/ta{vartype}.ctrd.relmat'
   message:
     """--- Calculating centered relatedness matrix with gemma ---"""
   shell:
     """
+    cd vars/taSubInDel/stats/gemma/
     gemma -g {input.mg} -p {input.pheno} -gk 1 -o {output.relM}
+    cd ../../../../
     """
 
 rule get_vartype:
