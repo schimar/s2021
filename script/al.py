@@ -879,18 +879,21 @@ if __name__ == "__main__":
 
 
 
-    df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon']]
-    df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon']
+    df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon', 'related_within_QG_prelim', 'queenNo_Pamilo', 'nitrogen_soil', 'Precip_annual', 'Precip_WettestQuarter', 'Precip_DriestQuarter', 'Precip_WarmestQuarter', 'Precip_ColdestQuarter', 'Temp_meanYear', 'TempSeason', 'TempMax_WarmestMonth', 'TempMin_ColdestMonth']]
+    df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'precipWetQu', 'precipDrQu', 'precipWaQu', 'precipCoQu', 'TmeanYr', 'Tseas', 'TMaxWaMo', 'TMinCoMo']
 
     df1.loc[:,'het'] = propHets
     df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
     df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
     df1.loc[:, 'gyn'] = 0
-    df1['gyn'][df1['pop'] == 2] = 1
+    df1.loc[:,'gyn'][df1['pop'] == 2] = 1
 
 
     df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-    df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'het', 'nest', 'pop', 'gyn', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+    df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'precipWetQu', 'precipDrQu', 'precipWaQu', 'precipCoQu', 'TmeanYr', 'Tseas', 'TMaxWaMo', 'TMinCoMo', 'het', 'nest', 'pop', 'gyn', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+    # check for NaNs
+    # df.isna().any()
+
 
     # write pheno file (for gemma)
     #phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
@@ -990,7 +993,7 @@ if __name__ == "__main__":
     print("--- Calculating correlations and plotting heatmaps ---")
 
     fig.clear()
-    fig = plt.figure(figsize=(14,12))
+    fig = plt.figure(figsize=(20,20))
     sns.heatmap(df.corr(), cmap='coolwarm', annot=True)
     plt.tight_layout()
     plt.savefig(os.path.join(varpcafP,'df_corr_heat.png'), bbox_inches='tight')
