@@ -8,11 +8,11 @@
 from sys import argv
 
 with open(argv[2], 'rb') as scafbp_file:
-    scafbp = list()
+    scafbp = set()
     for line in scafbp_file:
         line = bytes.decode(line).strip('\n')
         tmp = ' '.join(line.split('\t')[:2])
-        scafbp.append(tmp)#':'.join(line.split('\t')[:2]))
+        scafbp.add(tmp)#':'.join(line.split('\t')[:2]))
 
 with open(argv[1], 'rb') as vcfile:
     for line in vcfile:

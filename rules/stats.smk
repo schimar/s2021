@@ -26,10 +26,10 @@ rule alStats:
 
 rule gemma_mg:
   input:
-    vcf = 'vars/taSubInDelBypop.vcf'
+    vcf = 'vars/taSubInDel.{sets}.vcf'
     #vcf = 'vars/ta{vartype}Bypop.vcf'
   output:
-    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.mg'
+    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg'
     #mg = 'vars/ta{vartype}/stats/gemma/{vartype}.mg'
   message:
     """--- Converting vcf to bimbam format ---"""
@@ -40,12 +40,12 @@ rule gemma_mg:
 
 rule gemma_relmat_stdzd:
   input:
-    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.mg',
+    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg',
     pheno = 'vars/taSubInDel/stats/gemma/taSubInDel.pheno'
     #mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg',
     #pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
   output:
-    relM = 'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat'
+    relM = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.stdzd.relmat'
     #relM = 'vars/ta{vartype}/stats/gemma/ta{vartype}.stdzd.relmat'
   message:
     """--- Calculating standardized relatedness matrix with gemma ---"""
@@ -57,7 +57,7 @@ rule gemma_relmat_stdzd:
 rule gemma_relmat_ctrd:
   # NOTE: see **manual 4.4.2** on details regarding centered vs standardized rel.matrix
   input:
-    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.mg',
+    mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg',
     pheno = 'vars/taSubInDel/stats/gemma/taSubInDel.pheno'
     #mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg',
     #pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
@@ -76,21 +76,34 @@ rule gemma_relmat_ctrd:
 
 rule get_vartype:
   input:
-    vcf = 'vars/taSubInDelBypop.vcf'
+    vcf = 'vars/taSubInDel.{sets}.vcf'
   output:
-    txt = 'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt'
+    txt = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.txt'
   message: 
-    """--- Getting variant type for taSubInDel vcf ---"""
+    """--- Getting variant type for vcf ---"""
   shell:
     """
     grep -v '#' {input.vcf} | egrep -o 'TYP=[A-Z]+' | cut -f2 -d$'=' > {output.txt}
     """
 
 
-rule sub_vcf_scafbp:
+rule sub_seg_scafbp:
   input:
     vcf = 'vars/taSubInDelBypop.vcf',
     scafbp = 'vars/taSubInDel/stats/gemma/vars_seg.gemma.scafbp'
+  output:
+    vcf = 'vars/taSubInDel.seg.vcf'
+  message:
+    """--- Taking subset of LD-pruned variants ---"""
+  shell:
+    """
+    script/sub_vcf_scafbp.py {input.vcf} {input.scafbp} > {output.vcf}
+    """
+
+rule sub_ldp_scafbp:
+  input:
+    vcf = 'vars/taSubInDelBypop.vcf',
+    scafbp = 'vars/taSubInDel/stats/al/pca/ld_prunedVars.scafbp.txt'
   output:
     vcf = 'vars/taSubInDel.ldp.vcf'
   message:

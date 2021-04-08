@@ -8,7 +8,6 @@
 from sys import argv
 import pandas as pd
 
-# NOTE: create dict with scaf, bp of variants to keep?!
 
 def get012(x):
     if x == '0/0':
