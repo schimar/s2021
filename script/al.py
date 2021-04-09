@@ -879,25 +879,31 @@ if __name__ == "__main__":
 
 
 
-    df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon', 'related_within_QG_prelim', 'queenNo_Pamilo', 'nitrogen_soil', 'Precip_annual', 'Precip_WettestQuarter', 'Precip_DriestQuarter', 'Precip_WarmestQuarter', 'Precip_ColdestQuarter', 'Temp_meanYear', 'TempSeason', 'TempMax_WarmestMonth', 'TempMin_ColdestMonth']]
-    df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'precipWetQu', 'precipDrQu', 'precipWaQu', 'precipCoQu', 'TmeanYr', 'Tseas', 'TMaxWaMo', 'TMinCoMo']
+#    df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon', 'related_within_QG_prelim', 'queenNo_Pamilo', 'nitrogen_soil', 'Precip_annual', 'Precip_WettestQuarter', 'Precip_DriestQuarter', 'Precip_WarmestQuarter', 'Precip_ColdestQuarter', 'Temp_meanYear', 'TempSeason', 'TempMax_WarmestMonth', 'TempMin_ColdestMonth']]
+#    df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'precipWetQu', 'precipDrQu', 'precipWaQu', 'precipCoQu', 'TmeanYr', 'Tseas', 'TMaxWaMo', 'TMinCoMo']
 
-    df1.loc[:,'het'] = propHets
-    df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
-    df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
-    df1.loc[:, 'gyn'] = 0
-    df1.loc[:,'gyn'][df1['pop'] == 2] = 1
+df1 = ids[['elevation', 'agg', 'MMAI_worker', 'AI_worker', 'lat', 'lon', 'related_within_QG_prelim', 'queenNo_Pamilo', 'nitrogen_soil', 'Precip_annual']]
+df1.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn']
+
+df1.loc[:,'het'] = propHets
+df1.loc[:, 'nest'] = pd.factorize(ids['nest'])[0]
+df1.loc[:, 'pop'] = pd.factorize(ids['pop'])[0]
+df1.loc[:, 'gyn'] = 0
+df1.loc[:,'gyn'][df1['pop'] == 2] = 1
+
+#r = df1['related_within_QG_prelim']
+df1.loc[:, 'enq'] = (3-df1['relWithinQG'])/(3*df1['relWithinQG'])
 
 
-    df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
-    df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'precipWetQu', 'precipDrQu', 'precipWaQu', 'precipCoQu', 'TmeanYr', 'Tseas', 'TMaxWaMo', 'TMinCoMo', 'het', 'nest', 'pop', 'gyn', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
+df = pd.concat([df1, pd.DataFrame(coords1var[:,:4]), pd.DataFrame(coords2allVars[:,:4])], axis=1, join='inner')
+df.columns = ['elev', 'agg', 'MMAI', 'AI', 'lat', 'lon', 'relWithinQG', 'qNoPa', 'Nsoil', 'precipAnn', 'het', 'nest', 'pop', 'gyn', 'enq', 'pc1ldp', 'pc2ldp', 'pc3ldp', 'pc4ldp', 'pc1av', 'pc2av', 'pc3av', 'pc4av']
     # check for NaNs
     # df.isna().any()
 
 
     # write pheno file (for gemma)
     #phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
-    phenos = df[['agg', 'gyn']]
+    phenos = df[['agg', 'enq']]
     phenos.to_csv(os.path.join(gemmasP, '.'.join([ varname, 'pheno' ])), sep= ' ', index= False, header= False)
 
     df_st =  StandardScaler().fit_transform(df)
