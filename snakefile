@@ -33,6 +33,7 @@ rule all:
 	    'vars/taSubInDel.seg.vcf', 
 	    'vars/taSubInDel.ldp.vcf',
 	    expand('vars/ta{type}/figs/vcftools/plots.done', type=['SubInDel', 'InDel', 'Sub']),
+		'test for ssh auth on lotte'
 
 
 
