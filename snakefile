@@ -29,7 +29,7 @@ rule all:
 	    #'vars/taSubInDel/stats/gemma/relmat/ctrd.done',
 	    #'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
         ##'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
-	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.txt', sets=['ldp', 'seg']),
+	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.typ.txt', sets=['ldp', 'seg']),
 	    'vars/taSubInDel.seg.vcf', 
 	    'vars/taSubInDel.ldp.vcf',
 	    expand('vars/ta{type}/figs/vcftools/plots.done', type=['SubInDel', 'InDel', 'Sub']),

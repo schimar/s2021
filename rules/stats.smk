@@ -78,7 +78,7 @@ rule get_vartype:
   input:
     vcf = 'vars/taSubInDel.{sets}.vcf'
   output:
-    txt = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.txt'
+    txt = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.typ.txt'
   message: 
     """--- Getting variant type for vcf ---"""
   shell:
