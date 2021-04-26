@@ -114,4 +114,15 @@ rule sub_ldp_scafbp:
     """
 
 
+rule ngsRelate:
+  input:
+    vcf = 'vars/taSubInDelBypop.vcf'
+  output:
+    stats = 'vars/taSubInDel/stats/ngsRelate/stats.txt'
+  message:
+    """--- Calculating relatedness (etc.) with ngsRelate2 ---"""
+  shell:
+    """
+    ngsRelate -h {input.vcf} -T GT -c 1 -O {output.stats}
+    """
 
