@@ -123,6 +123,7 @@ rule ngsRelate:
     """--- Calculating relatedness (etc.) with ngsRelate2 ---"""
   shell:
     """
-    ngsRelate -h {input.vcf} -T GT -c 1 -O {output.stats}
+    module load ngsrelate/2.0
+    ngsrelate -h {input.vcf} -T GT -c 1 -O {output.stats} -z vars/ids.txt
     """
 

@@ -72,16 +72,16 @@ rule filtVarsALL:
     """
 
 
-rule sortIDsByPop:
-  input:
-    'samples109.txt'
-  output:
-    'vars/tapopsOrd.txt'
-  message: """--- Creating list of ids & nests ordered by nests ---"""
-  shell:
-    """
-    grep -v 'id' {input} | cut -f3,4 | sort -k2 | awk 'BEGIN {{ OFS=FS="\t" }} {{$2=$2 "\t" $2 }} 1' | sed -E 's/([[:alpha:]])\t/\1_/g' > {output}
-    """
+#rule sortIDsByPop:
+#  input:
+#    'samples109.txt'
+#  output:
+#    'vars/tapopsOrd.txt'
+#  message: """--- Creating list of ids & nests ordered by nests ---"""
+#  shell:
+#    """
+#    grep -v 'id' {input} | cut -f3,4 | sort -k2 | awk 'BEGIN {{ OFS=FS="\t" }} {{$2=$2 "\t" $2 }} 1' | sed -E 's/([[:alpha:]])\t/\1_/g' > {output}
+#    """
 
 
 rule sortVcfbyPop:

@@ -14,7 +14,7 @@
 ####    type, too.
 
 ###PBS -l nodes=2:ppn=12,pmem=4000mb
-#PBS -l select=1:mem=240gb:ncpus=24
+#PBS -l select=1:mem=240gb:ncpus=12
 #PBS -l walltime=72:00:00
 ##PBS -l qos=flux
 
@@ -47,8 +47,8 @@
 # module load intel/16.0.4
 # module load sratoolkit/2.8.2-1
 module load jdk/1.8.0_45 
-#module load snakemake/5.32.0-conda-2020.03 
-module load Anaconda3/2020.03/miniconda-base-2020.03
+module load ngsrelate/2.0
+module load Anaconda3/2021.04/miniconda-base-2021.04
 
 source $UIBK_CONDA_PROFILE
 
@@ -85,7 +85,9 @@ fi
 
 
 # Initiating snakemake and running workflow in cluster mode
-snakemake --use-envmodules --profile config/pbs-torque/ --latency-wait 900 --restart-times 4
+
+export NUMEXPR_MAX_THREADS=${NCPUS:-12}
+sysconfcpus -n ${NCPUS:-12} snakemake --use-envmodules --profile config/pbs-torque/ --latency-wait 900 --restart-times 4
 
 
 

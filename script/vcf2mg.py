@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#! /usr/bin/python
 
 # This script reads through a vcf file and writes a bimbam file for all individuals and the given genotypes, with '0' for ref homozygote, '1' for heterozygote, and '2' for alt homozygote.
 
@@ -6,6 +6,7 @@
 
 
 from sys import argv
+import numpy as np
 import pandas as pd
 
 
