@@ -119,11 +119,12 @@ rule ngsRelate:
     vcf = 'vars/taSubInDelBypop.vcf'
   output:
     stats = 'vars/taSubInDel/stats/ngsRelate/stats.txt'
+  threads: 12
   message:
     """--- Calculating relatedness (etc.) with ngsRelate2 ---"""
   shell:
     """
     module load ngsrelate/2.0
-    ngsrelate -h {input.vcf} -T GT -c 1 -O {output.stats} -z vars/ids.txt
+    ngsrelate -h {input.vcf} -p 12 -T GT -c 1 -O {output.stats} -z vars/ids.txt
     """
 
