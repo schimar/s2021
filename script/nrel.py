@@ -169,7 +169,7 @@ if __name__ == "__main__":
         plt.subplot(nrows, ncols, i)
         p = sns.distplot(v['rab'])#scatterplot(data=v, x='rab', y='KING', palette=nest_cols)
         #p.legend_.remove()
-        plt.title(f'{k}')
+        plt.title(k)
     plt.tight_layout()
     plt.savefig(os.path.join(figsP, 'distplot.png'), bbox_inches='tight')
 
