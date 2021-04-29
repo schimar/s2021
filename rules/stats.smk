@@ -128,3 +128,15 @@ rule ngsRelate:
     ngsrelate -h {input.vcf} -p 12 -T GT -c 1 -O {output.stats} -z vars/ids.txt
     """
 
+rule relStats:
+  input:
+    zarr = 'vars/taSubInDel.zarr/'
+  output:
+    touch("vars/taSubInDel/nrel.done")
+  message:
+    """--- Creating ngsRelate summary statistics & figures ---"""
+  shell:
+    """
+    script/nrel.py {input.zarr}
+    """
+
