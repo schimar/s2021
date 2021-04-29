@@ -132,7 +132,7 @@ rule relStats:
   input:
     zarr = 'vars/taSubInDel.zarr/'
   output:
-    touch("vars/taSubInDel/nrel.done")
+    touch("vars/taSubInDel/relStats.done")
   message:
     """--- Creating ngsRelate summary statistics & figures ---"""
   shell:
