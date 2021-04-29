@@ -22,8 +22,8 @@ import matplotlib as mpl
 import seaborn as sns
 sns.set_style('whitegrid')
 
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
+#from sklearn.decomposition import PCA
+#from sklearn.preprocessing import StandardScaler
 
 #sns.set_style('ticks')
 #sns.set_context('notebook')
@@ -47,13 +47,14 @@ if __name__ == "__main__":
 
 
 
-    zarrPath = sys.argv[1]
+    #zarrPath = sys.argv[1]
+zarrPath = 'vars/taSubInDel.zarr/'
 
 
-    zarrname = zarrPath.strip('.zarr/')
+zarrname = zarrPath.strip('.zarr/')
     # create folders
 
-    varname = zarrname.split('/')[1]
+varname = zarrname.split('/')[1]
 
 
 #    statsP = os.path.join(zarrname, 'stats/al/')
@@ -79,7 +80,6 @@ if __name__ == "__main__":
 #    for folder in folderList:
 #        if not os.path.exists(folder):
 #            os.makedirs(folder)
-
 
 
     # load the data
@@ -145,7 +145,66 @@ nests = {
 
 
 rel = pd.read_table('vars/taSubInDel/stats/ngsRelate/stats.txt', sep= '\t')
+rel['na'] = rel['ida'].str.split('_').str[1]
+rel['nb'] = rel['idb'].str.split('_').str[1]
 
+nestDict = {}
+for nest in tnests.keys():
+    neststats = rel[(rel['na'] == nest) & (rel['nb'] == nest)]
+    nestDict[nest] = neststats[['rab', 'KING', 'R0', 'R1']]
+
+    #print(nest, nestrab.mean(), nestrab.std(), effQnumPamilo(nestrab.mean()))
+
+[len(vals) for vals in tnests.values()]
+
+
+#Effective queen number after Pamilo (1991)
+#f = (3-r)/(3r)
+#https://www.jstor.org/stable/pdf/2462158.pdf
+#
+#Effective queen number after Pedersen & Boomsma (2001)
+#neg = 3/4*r
+#https://onlinelibrary.wiley.com/doi/full/10.1046/j.1420-9101.1999.00109.x
+
+def effQnumPamilo(r):
+    f = (3-r)/(3*r)
+    return f
+
+def effQnumPedBoo(r):
+    f = 3/4*r
+    return f
+
+
+[(nest, df['rab'].mean(), df['rab'].std(), effQnumPamilo(df['rab'].mean() - (1.96*df['rab'].std())), effQnumPamilo(df['rab'].mean()), effQnumPamilo(df['rab'].mean() + (1.96*df['rab'].std()))) for nest, df in nestDict.items()]
+
+nest_cols = {
+        'A2': sns.color_palette()[0],
+        'A5': sns.color_palette()[1],
+        'A6': sns.color_palette()[2],
+        'N1': sns.color_palette()[3],
+        'N4': sns.color_palette()[4],
+        'N6': sns.color_palette()[5],
+        'S1': sns.color_palette()[6],
+        'S2': sns.color_palette()[7],
+        'S5': sns.color_palette()[8]
+}
+
+
+
+
+ncols = 3  # how many plots per row
+nrows = math.ceil(len(nestDict) / ncols)  # how many rows of plots
+plt.figure(figsize=(10, 4))  # change the figure size as needed
+for i, (k, v) in enumerate(nestDict.items(), 1):
+    plt.subplot(nrows, ncols, i)
+    p = sns.distplot(v['rab'])#scatterplot(data=v, x='rab', y='KING', palette=nest_cols)
+    #p.legend_.remove()
+    plt.title(f'DataFrame: {k}')
+plt.tight_layout()
+
+
+
+# ---------------------------------------------------------
 
 def matrixify(df, ids, param):
     m = np.zeros(shape=(109,109))
@@ -155,13 +214,13 @@ def matrixify(df, ids, param):
             if i == j:
                 m.iloc[i,j] = np.NaN   #continue
             else:
-                pair = df[(df['a'] == i) & (df['b'] == j)]
+                pair = df[(df['ida'] == ind1) & (df['idb'] == ind2)]
                 try:
                     np.float(pair[param])
                     m.iloc[i,j] = np.float(pair[param])
                 except:
                     continue
-    return(m.transpose())
+    return(m)   #.transpose())
 
 m = matrixify(rel, ids['id_nest'], 'rab')
 
@@ -170,14 +229,20 @@ m = matrixify(rel, ids['id_nest'], 'rab')
 sns.heatmap(m, cmap= 'coolwarm', annot= False)
 
 
-sns.scatterplot(rel['theta'], rel['rab'])
+sns.scatterplot(rel['R0'], rel['R1'])
 
 
 
+tnests = { key: nests[key] for key in nests if key not in ['all'] }
 
 
 
+spike_cols = [col for col in df.columns if 'spike' in col]
 
 
+[col for col in m.columns if 'A2' in col]
+
+
+[j for i in range(100) if i > 10 for j in range(i) if j < 20]
 
 
