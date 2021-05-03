@@ -35,7 +35,7 @@ rule gemma_mg:
     """--- Converting vcf to bimbam format ---"""
   shell:
     """
-    script/vcf2mg.py {input.vcf} > {output.mg}
+    python script/vcf2mg.py {input.vcf} > {output.mg}
     """
 
 rule gemma_relmat_stdzd:
