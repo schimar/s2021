@@ -38,6 +38,8 @@ rule gemma_mg:
     python script/vcf2mg.py {input.vcf} > {output.mg}
     """
 
+
+#Which of the two relatedness matrix to choose will largely depend on the underlying genetic architecture of the given trait. Specifically, if SNPs with lower minor allele frequency tend to have larger effects (which is inversely proportional to its genotype variance), then the standardized genotype matrix is preferred. If the SNP effect size does not depend on its minor allele frequency, then the centered genotype matrix is preferred. In our previous experience based on a limited examples, we typically find the centered genotype matrix provides better control for population structure in lower organisms, and the two matrices seem to perform similarly in humans.
 rule gemma_relmat_stdzd:
   input:
     mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg',
