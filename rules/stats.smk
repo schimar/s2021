@@ -21,7 +21,7 @@ rule alStats:
     """--- Creating scikit-allel statistics ---"""
   shell:
     """
-    script/al.py {input.zarr}
+    python script/al.py {input.zarr}
     """
 
 rule gemma_mg:
@@ -137,6 +137,6 @@ rule relStats:
     """--- Creating ngsRelate summary statistics & figures ---"""
   shell:
     """
-    script/nrel.py {input.zarr}
+    python script/nrel.py {input.zarr}
     """
 
