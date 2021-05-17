@@ -59,6 +59,7 @@ if __name__ == "__main__":
 
     statsP = os.path.join(zarrname, 'stats/ngsRelate/')
     figsP = os.path.join(zarrname, 'figs/ngsRelate/')
+    gemmasP = os.path.join(zarrname, 'stats/gemma')
 
     folderList = [statsP, figsP]
     for folder in folderList:
@@ -147,6 +148,12 @@ if __name__ == "__main__":
     nq = pd.DataFrame([(nest, df['rab'].mean(), df['rab'].std(), effQnumPamilo(df['rab'].mean()), effQnumPedBoo(df['rab'].mean())) for nest, df in nestDict.items()], columns= ['nest', 'meanRel', 'sdRel', 'nQueenPamilo', 'nQueenPedBoo'])
     nq.to_csv(os.path.join(statsP, 'relNqueen.txt'), header=True, index=False, sep= '\t')
 
+    nqid = pd.Series(nq.nQueenPamilo.values, index= nq.nest).to_dict()
+    ids['enq'] = ids['nest'].map(nqdi)
+    ids['enq'].to_csv(os.path.join(gemmasP, 'enq.pheno'), header= False, index= False, sep= ' ')
+
+
+
     nest_cols = {
         'A2': sns.color_palette()[0],
         'A5': sns.color_palette()[1],
@@ -204,8 +211,6 @@ if __name__ == "__main__":
 
 
     #sns.scatterplot(rel['R0'], rel['rab'])
-
-
 
 
 
