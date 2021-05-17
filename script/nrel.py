@@ -149,7 +149,7 @@ if __name__ == "__main__":
     nq.to_csv(os.path.join(statsP, 'relNqueen.txt'), header=True, index=False, sep= '\t')
 
     nqid = pd.Series(nq.nQueenPamilo.values, index= nq.nest).to_dict()
-    ids['enq'] = ids['nest'].map(nqdi)
+    ids['enq'] = ids['nest'].map(nqid)
     ids['enq'].to_csv(os.path.join(gemmasP, 'enq.pheno'), header= False, index= False, sep= ' ')
 
 

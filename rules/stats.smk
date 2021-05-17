@@ -102,56 +102,56 @@ rule sub_seg_scafbp:
     script/sub_vcf_scafbp.py {input.vcf} {input.scafbp} > {output.vcf}
     """
 
-rule unilmm:
-  input: 
-    geno
-    pheno
-    envir
-    relmat
-    scafbp (-a; annot?)
-    typ
-  output:
-    #dir? 
-  message:
-    """--- Univariate lmm assoc. test ---"""
-  shell:
-    """
-    gemma -g {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -k {input.relmat} -km 2 -lmm 4 -o {output.dir}
-    """
+#rule unilmm:
+#  input: 
+#    geno
+#    pheno
+#    #envir
+#    relmat
+#    scafbp (-a; annot?)
+#    typ
+#  output:
+#    #dir? 
+#  message:
+#    """--- Univariate lmm assoc. test ---"""
+#  shell:
+#    """
+#    gemma -g {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -k {input.relmat} -km 2 -lmm 4 -o {output.dir}
+#    """
 
-rule multilmm:
-  input:
-    geno
-    pheno
-    #envir
-    relmat
-    scafbp
-    #typ?
-  output:
-    # dir?
-  message:
-    """--- Multivariate lmm assoc. test ---"""
-  shell:
-    """
-    gemma -g  {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -lmm 4 -o {output.dir}
-    """
+#rule multilmm:
+#  input:
+#    genoa    # -g
+#    pheno    # -p 
+#    envir    # -gxe
+#    relmat   # -k
+#    scafbp
+#    #typ?
+#  output:
+#    # dir?
+#  message:
+#    """--- Multivariate lmm assoc. test ---"""
+#  shell:
+#    """
+#    gemma -g  {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -lmm 4 -o {output.dir}
+#    """
 
-rule bslmm:
-  input:
-    geno
-    pheno
-    #relmat
-    #envir
-    scafbp
-    #typ?
-  output:
-    # dir?
-  message:
-    """--- bslmm assoc. test ---"""
-  shell:
-    """
-    gemma -g  {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -lmm 4 -o {output.dir}
-    """
+#rule bslmm:
+#  input:
+#    geno
+#    pheno
+#    #relmat
+#    #envir
+#    scafbp
+#    #typ?
+#  output:
+#    # dir?
+#  message:
+#    """--- bslmm assoc. test ---"""
+#  shell:
+#    """
+#    gemma -g  {input.geno} -p {input.pheno} -n 1 -gxe {input.envir} -lmm 4 -o {output.dir}
+#    """
 
 rule sub_ldp_scafbp:
   input:

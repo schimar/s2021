@@ -685,7 +685,7 @@ if __name__ == "__main__":
     # for all (segreg.) vars
     segScafs = variants['variants/CHROM'][:][segAll_vars]
     segBP = variants['variants/POS'][:][segAll_vars]
-    segVars = pd.DataFrame({'bp': segScafs, 'scaf': segBP})
+    segVars = pd.DataFrame({'snpid': np.arange(0, segBP.shape[0]), 'bp': segScafs, 'scaf': segBP})
     ## for gemma:
     segVars.to_csv(os.path.join(gemmasP, 'vars_seg.gemma.scafbp'), sep= ' ', index= False, header= False)
 
@@ -903,8 +903,8 @@ if __name__ == "__main__":
 
     # write pheno file (for gemma)
     #phenos = ids[['started_aggression', 'reacted_aggressively', 'reacted_peacefully']]
-    phenos = df[['agg', 'enq']]
-    phenos.to_csv(os.path.join(gemmasP, '.'.join([ varname, 'pheno' ])), sep= ' ', index= False, header= False)
+    phenos = df[['agg']]
+    phenos.to_csv(os.path.join(gemmasP, 'agg.pheno'), sep= ' ', index= False, header= False)
 
     df_st =  StandardScaler().fit_transform(df)
 
