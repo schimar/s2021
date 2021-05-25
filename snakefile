@@ -26,9 +26,9 @@ rule all:
 	    ##expand('vars/ta{vartype}/stats/gemma/ta{vartype}.mg', vartype=['SubInDel', 'InDel', 'Sub']),
 	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg', sets=['ldp', 'seg']),
 	    ####expand('vars/taSubInDel/stats/gemma/taSubInDel.pheno', vartype=['SubInDel', 'InDel', 'Sub']),
-	    #'vars/taSubInDel/stats/gemma/relmat/ctrd.done',
-	    #'vars/taSubInDel/stats/gemma/taSubInDel.stdzd.relmat',
-        ##'vars/taSubInDel/stats/gemma/taSubInDel.typ.txt',
+	    ###'vars/taSubInDel/stats/gemma/relmat/ctrd.done',#
+	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.stdzd.relmat', sets=['ldp', 'seg']),
+	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.ctrd.relmat', sets=['ldp', 'seg']),
 	    expand('vars/taSubInDel/stats/gemma/taSubInDel.{sets}.typ.txt', sets=['ldp', 'seg']),
 	    'vars/taSubInDel.seg.vcf', 
 	    'vars/taSubInDel.ldp.vcf',

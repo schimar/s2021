@@ -78,7 +78,7 @@ rule gemma_relmat_ctrd:
 
 rule get_vartype:
   input:
-    vcf = 'vars/taSubInDel.{sets}.vcf'
+    vcf = ancient('vars/taSubInDel.{sets}.vcf')
   output:
     txt = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.typ.txt'
   message: 
@@ -92,7 +92,7 @@ rule get_vartype:
 rule sub_seg_scafbp:
   input:
     vcf = 'vars/taSubInDelBypop.vcf',
-    scafbp = 'vars/taSubInDel/stats/gemma/vars_seg.gemma.scafbp'
+    scafbp = ancient('vars/taSubInDel/stats/gemma/vars_seg.gemma.scafbp')
   output:
     vcf = 'vars/taSubInDel.seg.vcf'
   message:
@@ -111,7 +111,7 @@ rule sub_seg_scafbp:
 #    scafbp (-a; annot?)
 #    typ
 #  output:
-#    #dir? 
+#     directory('folder')
 #  message:
 #    """--- Univariate lmm assoc. test ---"""
 #  shell:
@@ -128,7 +128,7 @@ rule sub_seg_scafbp:
 #    scafbp
 #    #typ?
 #  output:
-#    # dir?
+#     directory('folder')
 #  message:
 #    """--- Multivariate lmm assoc. test ---"""
 #  shell:
@@ -145,7 +145,7 @@ rule sub_seg_scafbp:
 #    scafbp
 #    #typ?
 #  output:
-#    # dir?
+#     directory('folder')
 #  message:
 #    """--- bslmm assoc. test ---"""
 #  shell:
@@ -156,7 +156,7 @@ rule sub_seg_scafbp:
 rule sub_ldp_scafbp:
   input:
     vcf = 'vars/taSubInDelBypop.vcf',
-    scafbp = 'vars/taSubInDel/stats/al/pca/ld_prunedVars.scafbp.txt'
+    scafbp = ancient('vars/taSubInDel/stats/al/pca/ld_prunedVars.scafbp.txt')
   output:
     vcf = 'vars/taSubInDel.ldp.vcf'
   message:
@@ -165,7 +165,7 @@ rule sub_ldp_scafbp:
     """
     script/sub_vcf_scafbp.py {input.vcf} {input.scafbp} > {output.vcf}
     """
-
+#
 
 rule ngsRelate:
   input:
