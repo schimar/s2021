@@ -43,7 +43,7 @@ rule gemma_mg:
 rule gemma_relmat_stdzd:
   input:
     mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg',
-    pheno = 'vars/taSubInDel/stats/gemma/taSubInDel.pheno'
+    pheno = 'vars/taSubInDel/stats/gemma/{trait}.pheno'
     #mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg',
     #pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
   output:
@@ -60,7 +60,7 @@ rule gemma_relmat_ctrd:
   # NOTE: see **manual 4.4.2** on details regarding centered vs standardized rel.matrix
   input:
     mg = 'vars/taSubInDel/stats/gemma/taSubInDel.{sets}.mg',
-    pheno = 'vars/taSubInDel/stats/gemma/taSubInDel.pheno'
+    pheno = 'vars/taSubInDel/stats/gemma/{trait}.pheno'
     #mg = 'vars/ta{vartype}/stats/gemma/ta{vartype}.mg',
     #pheno = 'vars/ta{vartype}/stats/gemma/ta{vartype}.pheno'
   output:
