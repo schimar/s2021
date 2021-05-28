@@ -16,7 +16,6 @@ hyp <- read.table(infile, header=T)
 #path <- dirname(infile)
 
 outfile <- paste0(substr(infile, 1, nchar(infile)-3), 'pdf')
-print(outfile)
 
 # plot traces and distributions of hyperparameters
 # ==============================================================================
