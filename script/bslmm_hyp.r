@@ -62,8 +62,38 @@ plot(density(hyp$pi), main="n_gamma - posterior distribution", xlab="n_gamma")
 dev.off()
 # ==============================================================================
 
+# get table of hyperparameters
 
+# Get mean, median, and 95% ETPI of hyperparameters
+# ========================================================================
+# h-> approximation to proportion of phenotypic variance
+# explained by variants (PVE)
+h <- c("h",mean(hyp$h),quantile(hyp$h, probs=c(0.5,0.025,0.975)))
+# pve -> PVE
+pve <- c("PVE", mean(hyp$pve),quantile(hyp$pve,
+probs=c(0.5,0.025,0.975)))
+# rho-> approximation to proportion of genetic variance explained by variants
+# with major effect (PGE)
+# rho=0 -> pure LMM, highly polygenic basis
+# rho=1 -> pure BVSR, few major effect loci
+rho <- c("rho",mean(hyp$rho),quantile(hyp$rho, probs=c(0.5,0.025,0.975)))
+# pge -> PGE
+pge <- c("PGE",mean(hyp$pge),quantile(hyp$pge, probs=c(0.5,0.025,0.975)))
+# pi -> proportion of variants with non-zero effects
+pi <- c("pi",mean(hyp$pi),quantile(hyp$pi, probs=c(0.5,0.025,0.975)))
+# n.gamma -> number of variants with major effect
+n.gamma <- c("n.gamma",mean(hyp$n_gamma),quantile(hyp$n_gamma,
+probs=c(0.5,0.025,0.975)))
 
+# get table of hyperparameters and save it to a file
+# ==============================================================================
+hyp.table <- as.data.frame(rbind(h,pve,rho,pge,pi,n.gamma),row.names=F)
+colnames(hyp.table) <- c("hyperparam", "mean","median","2.5%", "97.5%")
+# show table
+hyp.table
+
+# write table to file
+write.table(hyp.table, file= file.path(outDir, "hyperparameters.dsv"), sep="\t", quote=F)
 
 
 
