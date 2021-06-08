@@ -591,10 +591,12 @@ if __name__ == "__main__":
 
     # LD pruning
 
-
     gnuVars, vars_ldPrd = ld_prune(nAltVars, segVars, size=50, step=20, threshold=.1, n_iter=4)
 
-    vars_ldPrd.to_csv(os.path.join(pcasP, 'ld_prunedVars.scafbp.txt'), header= False, index= False, sep= '\t')
+    #vars_ldPrd.to_csv(os.path.join(pcasP, 'ld_prunedVars.scafbp.txt'), header= False, index= False, sep= '\t')
+    ldpVars = pd.DataFrame({'snpid': np.arange(0, vars_ldPrd.shape[0]), 'scaf': vars_ldPrd['scaf'], 'bp': vars_ldPrd['bp']})
+    ## for gemma
+    ldpVars.to_csv(os.path.join(gemmasP, 'vars_ldp.gemma.scafbp'), sep= ' ', index= False, header= False)
 
     plot_ld(gnuVars[:1000], 'Pairwise LD after LD pruning.', filename= 'ld_prune.png')
 
