@@ -2,11 +2,12 @@ name: smk6
 channels:
   - conda-forge
   - bioconda
+  - jackkamm
 dependencies:
   - fastqc
   - multiqc
   - python
-  - snakemake-minimal=6
+  - snakemake-minimal>=6
   - bbmap
   - matplotlib
   - numpy
@@ -24,6 +25,12 @@ dependencies:
   - numexpr=2.7.2
   - gemma=0.98.3
   - vcftools=0.1.16
+  - momi>=2.0
+#  - r-base>=4
+#  - r-mixomics=6.3.2
+#  - r-matrixStats=0.60.1
+#  - bioconductor-biocparallel=1.26.0
+#  - r-glmnet=2.0_16
 #  - angsd       #=0.935
   - pip=20.1.1
 #  - pip:
