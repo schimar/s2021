@@ -25,11 +25,11 @@ if (!dir.exists(outDir)){
     print(paste0(outDir, " already exists"))
 }
 
-outfile <- paste0(file.path(outDir, subDir), '.hyp.pdf')
+outfile1 <- paste0(file.path(outDir, subDir), '.hyp.pve.pge.tiff')
 
 # plot traces and distributions of hyperparameters
 # ==============================================================================
-pdf(file=outfile, width=8.3,height=11.7)
+tiff(file=outfile1, compression= 'zip+p', width = 800, height = 800)#, units = "px", res = 800, type= 'Xlib')
 layout(matrix(c(1,1,2,3,4,4,5,6), 4, 2, byrow = TRUE))
 
 # PVE
@@ -45,6 +45,15 @@ plot(hyp$pge, type="l", ylab="PGE", main="PGE - trace")
 hist(hyp$pge, main="PGE - posterior distribution", xlab="PGE")
 plot(density(hyp$pge), main="PGE - posterior distribution", xlab="PGE")
 # ------------------------------------------------------------------------------
+dev.off()
+
+
+outfile2 <- paste0(file.path(outDir, subDir), '.hyp.pi.n_gamma.tiff')
+
+# plot traces and distributions of hyperparameters
+# ==============================================================================
+tiff(file=outfile2, compression= 'zip+p', width = 800, height = 800)#, units = "px", res = 800, type= 'Xlib')
+layout(matrix(c(1,1,2,3,4,4,5,6), 4, 2, byrow = TRUE))
 
 # pi
 # ------------------------------------------------------------------------------
