@@ -87,7 +87,7 @@ fi
 # Initiating snakemake and running workflow in cluster mode
 
 export NUMEXPR_MAX_THREADS=${NCPUS:-12}
-sysconfcpus -n ${NCPUS:-12} snakemake --use-envmodules --profile config/pbs-torque/ --latency-wait 900 --restart-times 4
+sysconfcpus -n ${NCPUS:-12} snakemake --use-envmodules --profile config/pbs-torque/ --jobscript code/load_condaenv.sh --latency-wait 900 --restart-times 4
 
 
 
